@@ -15,7 +15,7 @@ int matriksX[4][3] = {
 
 int matriksY[3][6] = {
     {1, 2, 3, 4, 5, 6},
-    {6, 5, 4, 3, 2, 1},
+    {1, 0, 1, 0, 1, 0},
     {1, 2, 4, 4, 1, 2}
 };
 
@@ -53,7 +53,7 @@ int main() {
         }
     }
 
-    printf("Matriks: \n");
+    printf("Hasil Matriks: \n");
 
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 6; j++) {
