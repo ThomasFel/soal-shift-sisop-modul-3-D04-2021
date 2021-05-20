@@ -226,10 +226,10 @@ Struktur direktori:
   printf("Hasil Matriks: \n");
 
   for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 6; j++) {
-             printf("%4d", matriksZ[i][j]);
-        }
-        printf("\n");
+       for (int j = 0; j < 6; j++) {
+            printf("%4d", matriksZ[i][j]);
+       }
+       printf("\n");
   }
   ```
   <i>Print</i> dengan `printf("%4d", matriksZ[i][j])` untuk tiap baris dan kolom menggunakan <i>counter</i> `i` dan `j` dan <i>increment</i> sebanyak jumlah baris, yaitu 4 dan jumlah kolom, yaitu 6.
@@ -262,6 +262,95 @@ Struktur direktori:
   If b > a -> a!
   If 0 -> 0
   ```
+  
+- <b>JAWABAN</b>
+
+  ```C
+  int main() {
+       key_t key = 1234;
+       int (*value)[6];
+
+       int shmid = shmget(key, 95, IPC_CREAT | 0666);
+       value = shmat(shmid, NULL, 0);
+
+       int *p = (int *) value;
+
+       memcpy(matriks, p, 95);
+  
+  . . .
+  
+  ```
+  
+  Fungsi main untuk penyelesaian soal menggunakan <i>thread</i>.
+  ```C
+  pthread_t tid[4][6];
+
+  printf("Matriks: \n");
+  for (int i = 0; i < 4; i++) {
+       for (int j = 0; j < 6; j++) {
+            printf("%4d", matriks[i][j]);
+       }
+
+       printf("\n");
+  }
+
+  for (int i = 0; i < 4; i++) {
+       for (int j = 0; j < 6; j++) {
+            struct args *index = (struct args *) malloc(sizeof(struct args));
+            index -> i = i;
+            index -> j = j;
+            index -> matriksA = matriks[i][j];
+            index -> matriksB = matriksInput[i][j];
+
+  pthread_create(&tid[i][j], NULL, &faktorial2, (void *)index);
+       }
+  }
+
+  for (int i = 0; i < 4; i++) {
+       for (int j = 0; j < 6; j++) {
+            pthread_join(tid[i][j], NULL);
+       }
+  }
+  ```
+  - Mendefinisikan `tid` dan `pthread` dengan jumlah ordo matriks hasil dan sebuah <i>struct</i> yang berisi atribut `index`.
+  - Me-<i>loop</i> matriks yang menyimpan matriks hasil perkalian dari [soal.2a](#2a "Goto 2a") untuk mengecek apakah matriks ini mempunyai <i>value</i> yang sama dengan matriks hasil soal sebelumnya (<i>debugging</i>).
+  - <i>Looping</i> pertama sebagai indikasi baris dan <i>looping</i> kedua sebagai indikasi kolom yang setiap indikasi baris dan kolom tersebut di-<i>set</i> ke `i` dan `j`. Lalu `matriks[i][j]` dan `matriksInput[i][j]` masing-masing di-<i>set</i> ke `matriksA` dan `matriksB`.
+  - <i>Thread</i> akan dibuat dengan `pthread_create(&tid[i][j], NULL, &perkalian, (void *)index)` dan berjalan dengan `tid` `i` dan `j` yang di-<i>increment</i> tiap <i>looping</i>-nya. <i>Thread</i> akan menjalankan fungsi `faktorial2` sebagai <i>routine</i> dengan atribut `index` sebagai variabel.
+  - <i>Join</i>-kan setiap <i>thread</i> yang telah dibuat dengan `pthread_join(tid[i][j], NULL)`.
+
+  Mencetak matriks hasil.
+  ```C
+  printf("Hasil Matriks: \n");
+  
+  for (int i = 0; i < 4; i++) {
+       for (int j = 0; j < 6; j++) {
+            printf("%4llu ", result[i][j]);
+       }
+       printf("\n");
+  }
+  
+  printf("\n");
+  
+  shmdt(value);
+  shmctl(shmid, IPC_RMID, NULL);
+  ```
+  <i>Print</i> dengan `printf("%4llu ", result[i][j])` untuk tiap baris dan kolom menggunakan <i>counter</i> `i` dan `j` dan <i>increment</i> sebanyak jumlah baris, yaitu 4 dan jumlah kolom, yaitu 6.
+  
+  Membuat <i>shared memory</i> untuk `matriksC` sesuai dengan <i>template</i> yang ada di modul 3.
+  ```C
+  key_t key = 1234;
+  int *value;
+
+  int shmid = shmget(key, sizeof(matriksZ), IPC_CREAT | 0666);
+  value = shmat(shmid, NULL, 0);
+
+  int *p = (int *) value;
+
+  memcpy(p, matriksZ, 95);
+
+  shmdt(value);
+  ```
+  Membuat terlebih dahulu <i>key</i>-nya. <i>Pointer</i> `p` menunjuk tiap isi array matriks dan dilakukan penyalinan data dengan `memcpy` melalui variabel <i>pointer</i> `p` terhadap variabel matriks hasil agar variabel matriks hasil yang memorinya di-<i>share</i> berisi hasil matriks yang telah dikalikan. Dan untuk mengakhiri share memory yang sedang berlangsung digunakan shmctl.
   
 ### 2C ###
 
