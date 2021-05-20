@@ -452,7 +452,7 @@ Struktur direktori:
        execvp(*ps_aux_arg, ps_aux_arg);
   }
   ```
-  - Melakukan <i>fork</i> untuk <i>parent process</i>-nya dan membuat <b>STDOUT</b> sehingga menduplikasi `fd[1]` yang berfungsi sebagai `write end` dari <i>pipe</i>.
+  - Melakukan <i>fork</i> untuk <i>parent process</i>-nya sehingga membuat <i>copy</i>-an `fd[1]` yang berfungsi sebagai `write end` dari <i>pipe</i> dengan <b>STDOUT</b>.
   - <i>Close</i> semua <i>file descriptor</i>.
   - `ps aux` akan dijalankan untuk menampilkan semua proses yang dijalankan oleh pengguna dengan menggunakan `execvp` yang argumen pertamanya menerima <i>array of pointer</i> `*ps_aux_arg` dan argumen kedua menerima <i>pointer to array of pointer</i> `ps_aux_arg` yang berisi <i>list string</i> perintah. <i>Parent process</i> hanya akan berjalan sekali.
   
@@ -476,7 +476,7 @@ Struktur direktori:
   . . .
   
   ```
-  - Melakukan <i>fork</i> untuk <i>child process</i>-nya dan membuat <b>STDIN</b> sehingga menduplikasi `fd[0]` yang berfungsi sebagai input atau `read end` hasil `ps aux` dari <i>pipe</i> dan `fd[3]` yang berfungsi sebagai `write end` dari <i>pipe</i> dengan <b>STDOUT</b>.
+  - Melakukan <i>fork</i> untuk <i>child process</i>-nya sehingga membuat <i>copy</i>-an `fd[0]` yang berfungsi sebagai input atau `read end` hasil `ps aux` dari <i>pipe</i> dengan <b>STDIN</b> dan `fd[3]` yang berfungsi sebagai `write end` dari <i>pipe</i> dengan <b>STDOUT</b>.
   - <i>Close</i> semua <i>file descriptor</i>.
   - `sort -nrk 3,3` akan dijalankan untuk menampilkan semua proses yang dijalankan oleh pengguna dengan menggunakan `execvp` yang argumen pertamanya menerima <i>array of pointer</i> `*sort_arg` dan argumen kedua menerima <i>pointer to array of pointer</i> `sort_arg` yang berisi <i>list string</i> perintah. <i>Child process</i> hanya akan berjalan sekali.
   
@@ -497,7 +497,7 @@ Struktur direktori:
        }
   }
   ```
-  - Melakukan <i>fork</i> untuk <i>child process</i>-nya dan membuat <b>STDIN</b> sehingga menduplikasi `fd[2]` yang berfungsi sebagai input atau `read end` hasil `sort -nrk 3,3` dari <i>pipe</i>.
+  - Melakukan <i>fork</i> untuk <i>child process</i>-nya sehingga membuat <i>copy</i>-an `fd[2]` yang berfungsi sebagai input atau `read end` hasil `sort -nrk 3,3` dari <i>pipe</i> dengan <b>STDIN</b>.
   - <i>Close</i> semua <i>file descriptor</i>.
   - `head -5` akan dijalankan untuk menampilkan 5 proses teratas dengan menggunakan `execvp` yang argumen pertamanya menerima <i>array of pointer</i> `*head_arg` dan argumen kedua menerima <i>pointer to array of pointer</i> `head_arg` yang berisi <i>list string</i> perintah. <i>Child process</i> hanya akan berjalan sekali.
 
