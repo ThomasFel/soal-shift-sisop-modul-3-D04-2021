@@ -412,6 +412,108 @@ Struktur direktori:
 - <b>SOAL</b>
 
   Karena takut <i>lag</i> dalam pengerjaannya membantu Loba, Crypto juga membuat program (soal2c.c) untuk mengecek 5 proses teratas apa saja yang memakan <i>resource</i> komputernya dengan command `ps aux | sort -nrk 3,3 | head -5` (<b>Catatan!</b>: Harus menggunakan <i>IPC Pipes</i>).
+
+- <b>JAWABAN</b>
+  
+  Melakukan <i>fork</i> yang mana <i>parent process</i> akan menjadi `write end` dari <i>pipe</i> dan <i>child</i> akan menjadi `read end` dari output <i>parent process</i>.
+  ```C
+  int main(int argc, char **argv) {
+       pid_t child_id;
+    
+       int fd[4];
+       int status;
+       char *ps_aux_arg[] = {"ps", "aux", NULL};
+       char *sort_arg[] = {"sort", "-nrk", "3,3", NULL};
+       char *head_arg[] = {"head", "-5", NULL};
+
+       pipe(fd);
+       pipe(fd + 2);
+  
+  . . .
+  
+  ```
+  - Men-<i>set</i> `child_id` untuk <i>thread</i> dengan <b>pid_t</b> dan dua <i>file descriptor</i> yaitu `fd` sebagai `read end` dan `fd + 2` sebagai `write end`.
+  - Mendefinisikan <i>array of pointer</i> `*ps_aux_arg[]` untuk menyimpan <i>list string</i> perintah `ps aux`.
+  - Mendefinisikan <i>array of pointer</i> `*sort_arg[]` untuk menyimpan <i>list string</i> perintah `sort -nrk 3,3`.
+  - Mendefinisikan <i>array of pointer</i> `*head_arg[]` untuk menyimpan <i>list string</i> perintah `head -5`.
+  
+  Membuat <i>process</i> yang digunakan untuk `ps aux`. Di sini menggunakan <b>STDOUT_FILENO</b> (<i>standard output value</i>) yang mempunyai <i>value</i> 1. 
+  ```C
+  child_id = fork();
+        
+  if (child_id == 0) {
+       dup2(fd[1], STDOUT_FILENO);
+
+       close(fd[0]);
+       close(fd[1]);
+       close(fd[2]);
+       close(fd[3]);
+
+       execvp(*ps_aux_arg, ps_aux_arg);
+  }
+  ```
+  - Melakukan <i>fork</i> untuk <i>parent process</i>-nya dan membuat <b>STDOUT</b> sehingga menduplikasi `fd[1]` yang berfungsi sebagai `write end` dari <i>pipe</i>.
+  - <i>Close</i> semua <i>file descriptor</i>.
+  - `ps aux` akan dijalankan untuk menampilkan semua proses yang dijalankan oleh pengguna dengan menggunakan `execvp` yang argumen pertamanya menerima <i>array of pointer</i> `*ps_aux_arg` dan argumen kedua menerima <i>pointer to array of pointer</i> `ps_aux_arg` yang berisi <i>list string</i> perintah. <i>Parent process</i> hanya akan berjalan sekali.
+  
+  Membuat <i>process</i> yang digunakan untuk `sort -nrk 3,3`. Di sini menggunakan <b>STDIN_FILENO</b> (<i>standard input value</i>) yang mempunyai <i>value</i> 0 dan <b>STDOUT_FILENO</b> (<i>standard output value</i>) yang mempunyai <i>value</i> 1. 
+  ```C
+  else {
+       child_id = fork();
+        
+       if (child_id == 0) {
+           dup2(fd[0], STDIN_FILENO);
+           dup2(fd[3], STDOUT_FILENO);
+
+           close(fd[0]);
+           close(fd[1]);
+           close(fd[2]);
+           close(fd[3]);
+
+           execvp(*sort_arg, sort_arg);
+       }
+  
+  . . .
+  
+  ```
+  - Melakukan <i>fork</i> untuk <i>child process</i>-nya dan membuat <b>STDIN</b> sehingga menduplikasi `fd[0]` yang berfungsi sebagai input atau `read end` hasil `ps aux` dari <i>pipe</i> dan `fd[3]` yang berfungsi sebagai `write end` dari <i>pipe</i> dengan <b>STDOUT</b>.
+  - <i>Close</i> semua <i>file descriptor</i>.
+  - `sort -nrk 3,3` akan dijalankan untuk menampilkan semua proses yang dijalankan oleh pengguna dengan menggunakan `execvp` yang argumen pertamanya menerima <i>array of pointer</i> `*sort_arg` dan argumen kedua menerima <i>pointer to array of pointer</i> `sort_arg` yang berisi <i>list string</i> perintah. <i>Child process</i> hanya akan berjalan sekali.
+  
+  Membuat <i>process</i> yang digunakan untuk `head -5`. Di sini menggunakan <b>STDIN_FILENO</b> (<i>standard input value</i>) yang mempunyai <i>value</i> 0.
+  ```C
+  else {
+       child_id = fork();
+            
+       if (child_id == 0) {
+            dup2(fd[2], STDIN_FILENO);
+
+            close(fd[0]);
+            close(fd[1]);
+            close(fd[2]) 
+            close(fd[3]);
+
+            execvp(*head_arg, head_arg);
+       }
+  }
+  ```
+  - Melakukan <i>fork</i> untuk <i>child process</i>-nya dan membuat <b>STDIN</b> sehingga menduplikasi `fd[2]` yang berfungsi sebagai input atau `read end` hasil `sort -nrk 3,3` dari <i>pipe</i>.
+  - <i>Close</i> semua <i>file descriptor</i>.
+  - `head -5` akan dijalankan untuk menampilkan 5 proses teratas dengan menggunakan `execvp` yang argumen pertamanya menerima <i>array of pointer</i> `*head_arg` dan argumen kedua menerima <i>pointer to array of pointer</i> `head_arg` yang berisi <i>list string</i> perintah. <i>Child process</i> hanya akan berjalan sekali.
+
+  Setelah semua <i>process</i> dilakukan, <i>close</i> semua <i>file descriptor</i>.
+  ```C
+  close(fd[0]);
+  close(fd[1]);
+  close(fd[2]);
+  close(fd[3]);
+  
+  for (int i = 0; i < 3; i++) {
+       wait(&status);
+  }
+  ```
+  Terakhir, melakukan looping dari 0 sampai 2 (sesuai jumlah <i>process</i>) untuk melakukan proses `wait` untuk menunda eksekusi <i>process</i> yang berjalan hingga salah satu <i>child</i>-nya <i>terminate</i>.
+  
   
 ## SOAL 3 ##
 
