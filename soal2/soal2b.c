@@ -85,7 +85,7 @@ int main() {
             index -> matriksA = matriks[i][j];
             index -> matriksB = matriksInput[i][j];
             
-            pthread_create(&tid[i][j], NULL, &faktorial2, (void *) index);
+            pthread_create(&tid[i][j], NULL, &faktorial2, (void *)index);
         }
     }
     
