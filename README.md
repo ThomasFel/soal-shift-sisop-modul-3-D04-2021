@@ -232,7 +232,7 @@ Struktur direktori:
        printf("\n");
   }
   ```
-  <i>Print</i> dengan `printf("%4d", matriksZ[i][j])` untuk tiap baris dan kolom menggunakan <i>counter</i> `i` dan `j` dan <i>increment</i> sebanyak jumlah baris, yaitu 4 dan jumlah kolom, yaitu 6.
+  <i>Print</i> dengan `printf("%4d", matriksZ[i][j])` untuk tiap baris dan kolom menggunakan <i>counter</i> `i` dan `j` dan <i>increment</i> sebanyak jumlah baris, yaitu 4 dan jumlah kolom, yaitu 6. `%4d` di sini adalah untuk banyak karakter <b>integer</b> yang akan dicetak dari matriks `matriksZ[i][j]`.
   
   Membuat <i>shared memory</i> untuk `matriksC` sesuai dengan <i>template</i> yang ada di modul 3.
   ```C
@@ -248,7 +248,7 @@ Struktur direktori:
 
   shmdt(value);
   ```
-  Membuat terlebih dahulu <i>key</i>-nya. <i>Pointer</i> `p` menunjuk tiap isi array matriks dan dilakukan penyalinan data dengan `memcpy` melalui variabel <i>pointer</i> `p` terhadap variabel matriks hasil agar variabel matriks hasil yang memorinya di-<i>share</i> berisi hasil matriks yang telah dikalikan.
+  Membuat terlebih dahulu <i>key</i>-nya. <i>Pointer</i> `p` menunjuk tiap isi array matriks dan dilakukan penyalinan data dengan `memcpy` melalui variabel <i>pointer</i> `p` terhadap variabel matriks hasil agar variabel matriks hasil yang memorinya di-<i>share</i> berisi hasil matriks yang telah dikalikan. Dan untuk mengakhiri <i>shared memory</i> yang sedang berlangsung digunakan `shmctl`.
 
 ### 2B ###
 
@@ -264,7 +264,77 @@ Struktur direktori:
   ```
   
 - <b>JAWABAN</b>
+  
+  Membuat matriks yang akan digunakan sebagai <i>shared memory</i> dan thread untuk setiap nilai dari matriks hasil yang akan berjalan dengan <i>routine</i> faktorial.
+  ```C
+  int matriks[4][6];
 
+  unsigned long long result[4][6];
+  
+  int matriksInput[4][6] = {
+       {1, 2, 3, 4, 5, 6},
+       {1, 1, 1, 1, 1, 1},
+       {2, 2, 2, 2, 2, 2},
+       {1, 0, 1, 0, 1, 0}
+  };
+  ```
+  Pendefinisian tiga matriks yaitu `matriks` (4 × 6) sebagai matriks hasil perkalian soal sebelumnya, `matriksInput` (4 × 6) sebagai matriks yang digunakan untuk proses penghitungan faktorial, dan `result` (4 × 6) sebagai matriks hasil faktorial. <i>Value</i> di-<i>set</i> dengan interval 1 - 20 sesuai dengan permintaan soal.
+  
+  Kemudian, mendefinisikan <i>struct</i>. 
+  ```C
+  struct args {
+       int i;
+       int j;
+       int matriksA;
+       int matriksB;
+  };
+  ```
+  Di sini `i` sebagai baris, `j` sebagai kolom, `matriksA` sebagai matriks yang menyimpan matriks hasil perkalian [soal.2a](#2a "Goto 2a"), dan `matriksB` sebagai matriks yang digunakan untuk proses penghitungan faktorial.
+  
+  Membuat fungsi faktorial.
+  ```C
+  unsigned long long faktorial(int n) {
+       if (n == 0) {
+            return 1;
+       }
+
+       else {
+            return n * faktorial(n - 1);
+       }
+  }
+  ```
+  Menerima inputan dari parameter `n`, jika `n` bernilai 0, maka hasil faktorialnya 1, jika selain itu akan melakukan proses penghitungan secara iteratif sampai `n` bernilai 0.
+  
+  Membuat fungsi faktorial dengan pengondisian seperti yang diminta pada contoh di soal.
+  ```C
+  void *faktorial2(void *arg) {
+       struct args *index = (struct args *) arg;
+       int a = index -> matriksA;
+       int b = index -> matriksB;
+
+       int i = index -> i;
+       int j = index -> j;
+
+       if (a == 0 | b == 0) {
+            result[i][j] = 0;
+       }
+
+       else if (a >= b) {
+            int temp = a - b;
+            result[i][j] = faktorial(a) / faktorial(temp);
+       }
+
+       else if (b > a) {
+            result[i][j] = faktorial(a);
+       }
+  }
+  ```
+  - `i` dan `j` di-<i>set</i> dengan baris dan kolom matriks. Lalu `matriksA` dan `matriksB` masing-masing di-<i>set</i> ke `a` dan `b`.
+  - Jika `a` dan `b` bernilai 0, <i>value</i> matriks `result[i][j]` akan bernilai 0.
+  - Jika `a` lebih besar sama dengan `b`, mendeklarasikan variabel `temp` untuk menampung hasil pengurangan `a` dan `b` dan matriks `result[i][j]` akan bernilai hasil pembagian `faktorial(a)` dan `faktorial(temp)`.
+  - Jika `b` lebih besar dari `a`, <i>value</i> matriks `result[i][j]` akan bernilai `faktorial(a)`.
+  
+  Membuat <i>shared memory</i> untuk `matriks` sesuai dengan <i>template</i> yang ada di modul 3.
   ```C
   int main() {
        key_t key = 1234;
@@ -280,6 +350,7 @@ Struktur direktori:
   . . .
   
   ```
+  Membuat terlebih dahulu <i>key</i>-nya. <i>Pointer</i> `p` menunjuk tiap isi array matriks dan dilakukan penyalinan data dengan `memcpy` melalui variabel <i>pointer</i> `p` terhadap variabel matriks agar variabel matriks berisi hasil matriks yang telah dikalikan pada soal sebelumnya.
   
   Fungsi main untuk penyelesaian soal menggunakan <i>thread</i>.
   ```C
@@ -334,23 +405,7 @@ Struktur direktori:
   shmdt(value);
   shmctl(shmid, IPC_RMID, NULL);
   ```
-  <i>Print</i> dengan `printf("%4llu ", result[i][j])` untuk tiap baris dan kolom menggunakan <i>counter</i> `i` dan `j` dan <i>increment</i> sebanyak jumlah baris, yaitu 4 dan jumlah kolom, yaitu 6.
-  
-  Membuat <i>shared memory</i> untuk `matriksC` sesuai dengan <i>template</i> yang ada di modul 3.
-  ```C
-  key_t key = 1234;
-  int *value;
-
-  int shmid = shmget(key, sizeof(matriksZ), IPC_CREAT | 0666);
-  value = shmat(shmid, NULL, 0);
-
-  int *p = (int *) value;
-
-  memcpy(p, matriksZ, 95);
-
-  shmdt(value);
-  ```
-  Membuat terlebih dahulu <i>key</i>-nya. <i>Pointer</i> `p` menunjuk tiap isi array matriks dan dilakukan penyalinan data dengan `memcpy` melalui variabel <i>pointer</i> `p` terhadap variabel matriks hasil agar variabel matriks hasil yang memorinya di-<i>share</i> berisi hasil matriks yang telah dikalikan. Dan untuk mengakhiri share memory yang sedang berlangsung digunakan shmctl.
+  <i>Print</i> dengan `printf("%4llu ", result[i][j])` untuk tiap baris dan kolom menggunakan <i>counter</i> `i` dan `j` dan <i>increment</i> sebanyak jumlah baris, yaitu 4 dan jumlah kolom, yaitu 6. `%4llu` di sini adalah untuk banyak karakter <b>unsigned long long</b> yang akan dicetak dari matriks `result[i][j]`. Dan untuk mengakhiri <i>shared memory</i> yang sedang berlangsung digunakan `shmctl`.
   
 ### 2C ###
 
