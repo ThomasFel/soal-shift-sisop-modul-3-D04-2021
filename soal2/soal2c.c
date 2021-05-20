@@ -7,6 +7,8 @@
 #include <sys/stat.h>
 
 int main(int argc, char **argv) {
+    pid_t child_id;
+    
     int fd[4];
     int status;
     char *ps_aux_arg[] = {"ps", "aux", NULL};
@@ -15,8 +17,10 @@ int main(int argc, char **argv) {
 
     pipe(fd);
     pipe(fd + 2);
-
-    if (fork() == 0) {
+    
+    child_id = fork();
+        
+    if (child_id == 0) {
         dup2(fd[1], STDOUT_FILENO);
 
         close(fd[0]);
@@ -28,7 +32,9 @@ int main(int argc, char **argv) {
     }
 
     else {
-        if (fork() == 0) {
+        child_id = fork();
+        
+        if (child_id == 0) {
             dup2(fd[0], STDIN_FILENO);
             dup2(fd[3], STDOUT_FILENO);
 
@@ -41,7 +47,9 @@ int main(int argc, char **argv) {
         }
 
         else {
-            if (fork() == 0) {
+            child_id = fork();
+            
+            if (child_id == 0) {
                 dup2(fd[2], STDIN_FILENO);
 
                 close(fd[0]);
