@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
     close(fd[2]);
     close(fd[3]);
 
-    for (int i = 1; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
         wait(&status);
     }
 
