@@ -146,6 +146,110 @@ Struktur direktori:
 
   Membuat program perkalian matriks (4 × 3 dengan 3 × 6) dan menampilkan hasilnya. Matriks nantinya akan berisi angka 1 - 20 (tidak perlu dibuat filter angka).
 
+- <b>JAWABAN</b>
+
+  Perkalian matriks ini akan ada variabel yang mengindikasikan baris pertama dan kolom pertama pada pengulangan pertama yang dijadikan sebagai <i>counter</i> sesuai dengan syarat perkalian matriks.
+  
+  ```C
+  int matriksX[4][3] = {
+       {1, 1, 1},
+       {1, 2, 3},
+       {1, 1, 1},
+       {2, 2, 2}
+  };
+
+  int matriksY[3][6] = {
+       {1, 2, 3, 4, 5, 6},
+       {1, 0, 1, 0, 1, 0},
+       {1, 2, 4, 4, 1, 2}
+  };
+  
+  int matriksZ[4][6];
+  ```
+  Pendefinisian tiga matriks yaitu `matriksX` (4 × 3), `matriksY` (3 × 6), dan `matriksZ` (4 × 6) sebagai matriks hasil perkalian. <i>Value</i> di-<i>set</i> dengan interval 1 - 20 sesuai dengan permintaan soal.
+  
+  Kemudian, mendefinisikan <i>struct</i>. 
+  ```C
+  struct args {
+       int i;
+       int j;
+  };
+  ```
+  Di sini `i` sebagai baris dan `j` sebagai kolom.
+  
+  Membuat fungsi perkalian untuk menghitung matriks.
+  ```C
+  void *perkalian(void *arg) {
+       int i = ((struct args*) arg) -> i;
+       int j = ((struct args*) arg) -> j;
+
+       for (int k = 0; k < 3; k++) {
+            matriksZ[i][j] += matriksX[i][k] * matriksY[k][j];
+       }
+  }
+  ```
+  - Fungsi perkalian menggunakan `arg` sebagai argumennya. `((struct args*) arg) -> i` untuk memasukkan baris dari tiap matriks ke dalam variabel `i` dan `((struct args*) arg) -> j` untuk memasukkan kolom dari tiap matriks ke dalam variabel `j`.
+  - Pada <i>looping</i>, membuat sebuah variabel `k` yang menjadi nilai kesamaan ordo matriks (3 kolom di matriks pertama dan 3 baris di matriks kedua) yang akan mengulang sebanyak 3 kali.
+  - Perkalian dilakukan dengan mengalikan setiap baris di `matriksX` dengan setiap kolom di `matriksY`, jadi `k` mengindikasikan baris pertama dan kolom pertama pada pengulangan pertama dan seterusnya.
+  - Hasil perkalian akan ditambahkan dan dimasukkan ke dalam `matriksZ`. Pada <i>case</i> ini ordo matriks hasil adalah (4 × 6), karena ordo matriks hasil perkalian dua buah matriks adalah jumlah baris pertama dikali jumlah kolom ke dua.
+  
+  Fungsi main untuk penyelesaian soal menggunakan <i>thread</i>.
+  ```C
+  int main() {
+       pthread_t tid[4][6];
+
+       for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 6; j++) {
+                 struct args *index = (struct args*) malloc(sizeof(struct args));
+                 index -> i = i;
+                 index -> j = j;
+                 pthread_create(&tid[i][j], NULL, &perkalian, (void *)index);
+            }
+       }
+
+       for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 6; j++) {
+                 pthread_join(tid[i][j], NULL);
+            }
+       }
+  
+  . . .
+  
+  ```
+  - Mendefinisikan `tid` dan `pthread` dengan jumlah ordo matriks hasil dan sebuah <i>struct</i> yang berisi atribut `index`.
+  - <i>Looping</i> pertama sebagai indikasi baris dan <i>looping</i> kedua sebagai indikasi kolom yang setiap indikasi baris dan kolom tersebut di-<i>set</i> ke `i` dan `j`.
+  - <i>Thread</i> akan dibuat dengan `pthread_create(&tid[i][j], NULL, &perkalian, (void *)index)` dan berjalan dengan `tid` `i` dan `j` yang di-<i>increment</i> tiap <i>looping</i>-nya. <i>Thread</i> akan menjalankan fungsi `perkalian` sebagai <i>routine</i> dengan atribut `index` sebagai variabel.
+  - <i>Join</i>-kan setiap <i>thread</i> yang telah dibuat dengan `pthread_join(tid[i][j], NULL)`.
+
+  Mencetak matriks hasil.
+  ```C
+  printf("Hasil Matriks: \n");
+
+  for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 6; j++) {
+             printf("%4d", matriksZ[i][j]);
+        }
+        printf("\n");
+  }
+  ```
+  <i>Print</i> dengan `printf("%4d", matriksZ[i][j])` untuk tiap baris dan kolom menggunakan <i>counter</i> `i` dan `j` dan <i>increment</i> sebanyak jumlah baris, yaitu 4 dan jumlah kolom, yaitu 6.
+  
+  Menggunakan <i>shared memory</i> untuk sub-soal selanjutnya.
+  ```C
+  key_t key = 1234;
+  int *value;
+
+  int shmid = shmget(key, sizeof(matriksZ), IPC_CREAT | 0666);
+  value = shmat(shmid, NULL, 0);
+
+  int *p = (int *) value;
+
+  memcpy(p, matriksZ, 95);
+
+  shmdt(value);
+  ```
+  Membuat <i>shared memory</i> untuk `matriksC` sesuai dengan <i>template</i> yang ada di modul 3.
+
 ### 2B ###
 
 - <b>SOAL</b>
