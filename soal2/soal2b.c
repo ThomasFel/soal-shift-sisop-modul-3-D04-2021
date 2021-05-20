@@ -57,7 +57,7 @@ void *faktorial2(void *arg) {
 
 int main() {
     key_t key = 1234;
-    int (*value)[6];
+    int *value;
 
     int shmid = shmget(key, 95, IPC_CREAT | 0666);
     value = shmat(shmid, NULL, 0);
