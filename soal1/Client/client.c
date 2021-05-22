@@ -73,7 +73,6 @@ int main(int argc, char const *argv[]) {
             printf("SENDING DONE.\n\n");
             strcpy(message, "DONE");
             send(sock, message, strlen(message), 0);
-
         }
         
         //SOAL 1D
@@ -107,7 +106,6 @@ int main(int argc, char const *argv[]) {
             strcpy(message, "OK");
             send(sock, message, strlen(message), 0);
             printf("DOWNLOAD SUCCESS.\n\n");
-
         }
         
         else {
@@ -144,15 +142,12 @@ int main(int argc, char const *argv[]) {
                         strcpy(message, "OK");
                         send(sock, message, strlen(message), 0);
                     }
-                }
-                
-                while(strcmp(buffer, "DONE") != 0);
+                } while(strcmp(buffer, "DONE") != 0);
 
                 strcpy(message, "OK");
                 send(sock, message, strlen(message), 0);
             }
         }
-        
     }
 
     close(sock);
