@@ -606,16 +606,27 @@ Struktur direktori:
   Kemudian setelah fungsi `Kategori` mendapatkan string dari fungsi `cekTipe ` selanjutnya akan mengecek apabila folder tersebut sudah ada maka dengan perintah `sprintf` akan mengubah path dari file tersebut kedalam path yang baru yaitu path ke folder dengan tipe data yang sudah ditentukan.
   
   Output yang dihasilkan adalah sebagai berikut:
+  <br>
   [![3asebelum.png](https://i.postimg.cc/0ykK5BMq/3asebelum.png)](https://postimg.cc/PP752KQ6)
+  <br>
   Kondisi sebelum di run
+  <br>
   [![3adirun.png](https://i.postimg.cc/jdQJbbjX/3adirun.png)](https://postimg.cc/Cz5KG9kB)
+  <br>
   Pada saat di run di terminal akan muncul seperti ini
+  <br>
   [![3asesudah.png](https://i.postimg.cc/1zYvr6hf/3asesudah.png)](https://postimg.cc/f3m7wVbN)
+  <br>
   Kondisi setelah di run dimana file bs.hex dan Pledge.pdf sudah ada di dalam folder masing2
+  <br>
   [![3asesudah1.png](https://i.postimg.cc/VLcDgmTB/3asesudah1.png)](https://postimg.cc/kDfQX37B)
+  <br>
   isi folder hex
+  <br>
   [![3asesudah2.png](https://i.postimg.cc/nrfY3Gdc/3asesudah2.png)](https://postimg.cc/5YpC0LdZ)
+  <br>
   isi folder pdf
+  <br>
   
 ### 3B ###
 
