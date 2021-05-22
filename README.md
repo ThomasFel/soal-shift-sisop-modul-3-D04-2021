@@ -607,25 +607,25 @@ Struktur direktori:
   
   Output yang dihasilkan adalah sebagai berikut:
   <br>
-  [![3asebelum.png](https://i.postimg.cc/0ykK5BMq/3asebelum.png)](https://postimg.cc/PP752KQ6)
-  <br>
   Kondisi sebelum di run
   <br>
-  [![3adirun.png](https://i.postimg.cc/jdQJbbjX/3adirun.png)](https://postimg.cc/Cz5KG9kB)
+  [![3asebelum.png](https://i.postimg.cc/0ykK5BMq/3asebelum.png)](https://postimg.cc/PP752KQ6)
   <br>
   Pada saat di run di terminal akan muncul seperti ini
   <br>
-  [![3asesudah.png](https://i.postimg.cc/1zYvr6hf/3asesudah.png)](https://postimg.cc/f3m7wVbN)
+  [![3adirun.png](https://i.postimg.cc/jdQJbbjX/3adirun.png)](https://postimg.cc/Cz5KG9kB)
   <br>
   Kondisi setelah di run dimana file bs.hex dan Pledge.pdf sudah ada di dalam folder masing2
   <br>
-  [![3asesudah1.png](https://i.postimg.cc/VLcDgmTB/3asesudah1.png)](https://postimg.cc/kDfQX37B)
+  [![3asesudah.png](https://i.postimg.cc/1zYvr6hf/3asesudah.png)](https://postimg.cc/f3m7wVbN)
   <br>
   isi folder hex
   <br>
-  [![3asesudah2.png](https://i.postimg.cc/nrfY3Gdc/3asesudah2.png)](https://postimg.cc/5YpC0LdZ)
+  [![3asesudah1.png](https://i.postimg.cc/VLcDgmTB/3asesudah1.png)](https://postimg.cc/kDfQX37B)
   <br>
   isi folder pdf
+  <br>
+  [![3asesudah2.png](https://i.postimg.cc/nrfY3Gdc/3asesudah2.png)](https://postimg.cc/5YpC0LdZ)
   <br>
   
 ### 3B ###
@@ -690,14 +690,23 @@ Struktur direktori:
   Untuk no 3b diminta untuk mengkategorikan file-file yang ada didalam folder, untuk mengkategorikannya menggunakan fungsi `kategori` seperti nomer 3a namun untuk mengubah pathnya disini akan menggunakan rekursi untuk mengeluarkan file-file yang ada didalam folder tersebut dan mengkategorikannya berdasarkan ekstensi file tersebut dengan cara yang sama dengan 3a yaitu mengubah path dari file tersebut.
   
   Output yang dihasilkan adalah sebagai berikut:
-  [![3bsebelum.png](https://i.postimg.cc/V6CdHyTX/3bsebelum.png)](https://postimg.cc/CBwhz2wK)
+  <br>
   contoh folder sebelum di eksekusi
-  [![3bdirun.png](https://i.postimg.cc/CxcBRskn/3bdirun.png)](https://postimg.cc/fV0TFXHM)
+  <br>
+  [![3bsebelum.png](https://i.postimg.cc/V6CdHyTX/3bsebelum.png)](https://postimg.cc/CBwhz2wK)
+  <br>
   Saat di eksekusi maka di terminal akan muncul seperti ini
-  [![3bsesudah.png](https://i.postimg.cc/nLMsB9GR/3bsesudah.png)](https://postimg.cc/945FjMSZ)
+  <br>
+  [![3bdirun.png](https://i.postimg.cc/CxcBRskn/3bdirun.png)](https://postimg.cc/fV0TFXHM)
+  <br>
   Sesudah di eksekusi maka akan muncul folder jpg baru yang berasal dari folder sebelumnya
-  [![3bsesudah2.png](https://i.postimg.cc/s28McfnV/3bsesudah2.png)](https://postimg.cc/XZfNNWSh)
+  <br>
+  [![3bsesudah.png](https://i.postimg.cc/nLMsB9GR/3bsesudah.png)](https://postimg.cc/945FjMSZ)
+  <br>
   Isi dari folder jpg
+  <br>
+  [![3bsesudah2.png](https://i.postimg.cc/s28McfnV/3bsesudah2.png)](https://postimg.cc/XZfNNWSh)
+  <br>
 
 ### 3C ###
 
@@ -733,10 +742,15 @@ Struktur direktori:
   Dengan cara yang sama dengan 3b namun disini path yang digunakan adalah path folder yang ada saat ini sehingga folder yang ada didalam wordking directory akan mengkategorikan seluruh file dan folder yang ada didalam working directory
   
   Output yang dihasilkan adalah sebagai berikut:
-  [![3csebelum.png](https://i.postimg.cc/wxD1XpDp/3csebelum.png)](https://postimg.cc/Yjq27TXn)
+  <br>
   sebelum program di eksekusi
-  [![3csesudah.png](https://i.postimg.cc/T1jhfVTw/3csesudah.png)](https://postimg.cc/PvxdM8ps)
+  <br>
+  [![3csebelum.png](https://i.postimg.cc/wxD1XpDp/3csebelum.png)](https://postimg.cc/Yjq27TXn)
+  <br>
   Sesudah program di eksekusi
+  <br>
+  [![3csesudah.png](https://i.postimg.cc/T1jhfVTw/3csesudah.png)](https://postimg.cc/PvxdM8ps)
+  <br>
 
 ### 3D ###
 
@@ -748,10 +762,15 @@ Struktur direktori:
   Untuk menjalankan perintah tersebut menggunakan fungsi `cekTipe` yang sudah dijelaskan di no 3a dimana dalam fungsi tersebut akan mengembalikan string `hidden` apabila memebuhi syarat seperti dijelaskan di no 3a dan akan mengembalikan string `unknown` apabila memenuhi syarat yang ada dimana kemudian akan masuk ke fungsi `kategori` dengan membawa string `hidden` atau `unknown` yang kemudian akan diubah path dari file tersebut ke path folder yang sesuai.
   
   Output yang didapatkan adalah sebagai berikut:
-  [![3dhidden.png](https://i.postimg.cc/BbftrY9k/3dhidden.png)](https://postimg.cc/62z9RhQf)
+  <br>
   Isi dari folder hidden
-  [![3dunknown.png](https://i.postimg.cc/wTH7FGks/3dunknown.png)](https://postimg.cc/V5Gfk4pY)
+  <br>
+  [![3dhidden.png](https://i.postimg.cc/BbftrY9k/3dhidden.png)](https://postimg.cc/62z9RhQf)
+  <br>
   Isi dari folder unknown
+  <br>
+  [![3dunknown.png](https://i.postimg.cc/wTH7FGks/3dunknown.png)](https://postimg.cc/V5Gfk4pY)
+  <br>
 
 ### 3E ###
 
