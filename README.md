@@ -11,18 +11,347 @@ Kelompok D-04
 
 - <b>SOAL</b>
 
-  Pada saat <i>client</i> tersambung dengan <i>server</i>, terdapat dua pilihan pertama, yaitu register dan login. Jika memilih register, client akan diminta input ID dan <i>password</i>-nya untuk dikirimkan ke <i>server</i>. User juga dapat melakukan login. Login berhasil jika ID dan <i>password</i> yang dikirim dari aplikasi <i>client</i> sesuai dengan <i>list</i> akun yang ada di dalam aplikasi <i>server</i>. Sistem ini juga dapat menerima <i>multi-connections</i>. Koneksi terhitung ketika aplikasi <i>client</i> tersambung dengan <i>server</i>. Jika terdapat 2 koneksi atau lebih maka harus menunggu sampai <i>client</i> pertama keluar untuk bisa melakukan login dan mengakses aplikasinya. Keverk menginginkan lokasi penyimpanan ID dan <i>password</i> pada <i>file</i> bernama `akun.txt` dengan format:
+  Pada saat <i>client</i> tersambung dengan <i>server</i>, terdapat dua pilihan pertama, yaitu <i>register</i> dan <i>login</i>. Jika memilih register, <i>client</i> akan diminta input <b>ID</b> dan <b><i>password</i></b>-nya untuk dikirimkan ke <i>server</i>. User juga dapat melakukan <i>login</i>. <i>Login</i> berhasil jika ID dan <i>password</i> yang dikirim dari aplikasi <i>client</i> sesuai dengan <i>list</i> akun yang ada di dalam aplikasi <i>server</i>. Sistem ini juga dapat menerima <i>multi-connections</i>. Koneksi terhitung ketika aplikasi <i>client</i> tersambung dengan <i>server</i>. Jika terdapat 2 koneksi atau lebih maka harus menunggu sampai <i>client</i> pertama keluar untuk bisa melakukan <i>login</i> dan mengakses aplikasinya. Keverk menginginkan lokasi penyimpanan <b>ID</b> dan <b><i>password</i></b> pada <i>file</i> bernama `akun.txt` dengan format:
   ```
   id:password
   id2:password2
   ```
+  
+- <b>JAWABAN</b>
+
+  Menggunakan <i>template</i> `socket-client.c` dari modul 3.
+  
+  `client.c`
+  ```C
+  #define PORT 8080
+  
+  int main(int argc, char const *argv[]) {
+       struct sockaddr_in address;
+       int sock = 0, valread;
+       struct sockaddr_in serv_addr;
+       char *hello = "Hello from client";
+    
+       if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+           printf("\n Socket creation error \n");
+           return -1;
+       }
+  
+       memset(&serv_addr, '0', sizeof(serv_addr));
+  
+       serv_addr.sin_family = AF_INET;
+       serv_addr.sin_port = htons(PORT);
+      
+       if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
+           printf("\nInvalid address/ Address not supported \n");
+           return -1;
+       }
+  
+       if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+           printf("\nConnection Failed \n");
+           return -1;
+       }
+  
+  . . .
+  
+  close(sock);
+  
+  return 0;
+  ```
+  Memodifikasi sedikit <i>template</i> di atas dengan menambahkan `close(sock)` untuk menutup <i>socket</i> setelah menjalankan proses <i>client</i>.
+  
+  Menggunakan <i>template</i> `socket-server.c` dari modul 3.
+  
+  `server.c`
+  ```C
+  #define PORT 8080
+  
+  . . .
+  
+  int main(int argc, char const *argv[]) {
+       mkdir("FILES", 0777);
+
+       int server_fd, new_socket[1000];
+       struct sockaddr_in address;
+       int opt = 1;
+       int addrlen = sizeof(address);
+
+       if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+            perror("socket failed");
+            exit(EXIT_FAILURE);
+       }
+      
+       if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
+            perror("setsockopt");
+            exit(EXIT_FAILURE);
+       }
+
+       address.sin_family = AF_INET;
+       address.sin_addr.s_addr = INADDR_ANY;
+       address.sin_port = htons(PORT);
+      
+       if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
+            perror("bind failed");
+            exit(EXIT_FAILURE);
+       }
+
+       if (listen(server_fd, 3) < 0) {
+            perror("listen");
+            exit(EXIT_FAILURE);
+       }
+       
+  . . .
+  
+  return 0;
+  ```
+  Memodifikasi sedikit <i>template</i> di atas dengan menambahkan `mkdir("FILES", 0777)` untuk membuat direktori baru, yaitu <b>FILES</b> dengan <i>set permission</i> 0777 yang akan digunakan pada [soal.1b](#1b "Goto 1b").
+  
+  Fungsi <i>main thread</i>.
+  
+  `server.c`
+  ```C
+  pthread_t tid[1000], id_client_login;
+  
+  . . .
+  
+  int main(int argc, char const *argv[]) {
+  
+  . . .
+  
+  int ctr = 0;
+  
+       while (1) {
+            if ((new_socket[ctr] = accept(server_fd, (struct sockaddr *) &address, (socklen_t*)&addrlen)) < 0) {
+                 perror("accept");
+                 exit(EXIT_FAILURE);
+            }
+
+            pthread_create(&(tid[ctr]), NULL, operation, &new_socket[ctr]);
+            ctr++;
+            printf("Client %d is connected\n", ctr);
+       }
+
+       for (int i = 0; i < ctr; i++) {
+            pthread_join(tid[i], NULL);
+       }
+  
+       return 0;
+  
+  }
+  ```
+  - Mendefinisikan <i>thread</i> `tid` dan `id_client_login` sebagai variabel global.
+  - Mendeklarasikan variabel `ctr` untuk <i>counter</i> di dalam <i>main thread</i>.
+  - <i>Thread</i> akan dibuat dengan `pthread_create(&(tid[ctr]), NULL, operation, &new_socket[ctr])`. <i>Thread</i> akan menjalankan fungsi `operation` sebagai <i>routine</i> dengan atribut `&new_socket[ctr]` sebagai variabel.
+  - <i>Join</i>-kan setiap <i>thread</i> yang telah dibuat dengan `pthread_join(tid[i], NULL)`.
+  
+  Membuat fungsi `operation`, kemudian <i>looping</i> untuk menjalankan <i>client</i>.
+  
+  `server.c`
+  ```C
+  void *operation(void *arg) {
+       int *new_socket = (int *) arg; 
+       int flag = 0;
+       
+       while (1) {
+            char buffer[1024] = {0};
+            char message[1024] = {0};
+            char parameter[10][1024] = {0};
+            int index = 0;
+            int valread;
+  
+       . . .
+  
+       }
+  }
+  ```
+  - Mendeklarasikan variabel <i>pointer</i> `*new_socket` untuk membuat <i>socket</i> baru.
+  - Mendeklarasikan variabel `flag` untuk penanda dalam pengondisian <i>command</i> yang nanti diinput.
+  - Mendeklarasikan variabel `buffer` untuk menerima <i>buffer</i> (memori yang menyimpan data ketika data ditransfer).
+  - Mendeklarasikan variabel `message` untuk mengirim pesan ke <i>client</i> maupun sebaliknya.
+  - Mendeklarasikan variabel `parameter` untuk menyimpan nama <i>file download</i> atau di-<i>delete</i>.
+  - Mendeklarasikan variabel `index` untuk membantu <i>indexing</i> proses penyimpanan nama <i>file</i>.
+  - Mendeklarasikan variabel `valread` untuk menerima pesan dari <i>socket</i>.
+  
+  Membuat pengondisian untuk halaman awal ketika program dijalankan.
+  
+  `server.c`
+  ```C
+  if (flag == 0) { //LANDING PAGE
+       strcpy(message, "1.Register\n2.Login\n\nInput: ");
+       send(*new_socket, message, strlen(message), 0);
+       valread = recv(*new_socket, buffer, 1024, 0); //RECEIVE MESSAGES FROM SOCKET
+            
+       if (checkClose(valread, new_socket)) 
+            break;
+       }
+  
+  . . .
+  
+  ```
+  Jika `flag` mempunyai <i>value</i> 0, maka akan menampilkan halaman awal. Menggunakan `strcpy` untuk menyalin <i>string</i> yang akan dimunculkan di terminal ke variabel `message`. Lalu, mengirimkan pesan ke <i>client</i> dan nantinya `valread` akan menerima pesan balasan dari <i>socket</i>. Setelah itu, jika fungsi `checkClose` bernilai <b>TRUE</b> akan menghentikan <i>looping</i>.
+  
+  Membuat fungsi untuk pengecekan <i>client</i> apakah sedang <i>login</i> atau tidak.
+  
+  `server.c`
+  ```C
+  int login = 0, ctr = 1;
+  char id_login[100] = {0};
+  char password_login[100] = {0};
+  
+  bool checkClose(int valread, int *new_socket) {
+       if (valread == 0) {
+            if (pthread_equal(pthread_self(), id_client_login)) { //COMPARE 2 THREAD IDENTIFIERS, RETURNS THE ID OF THE CALLING THREAD
+                 login = 0;
+                 bzero(id_login, 100); //ERASE DATA IN THE 100 BYTES OF THE MEMORY STARTING AT THE LOCATION POINTED BY ID_LOGIN
+                 bzero(password_login, 100);
+            }
+
+            close(*new_socket);
+            return 1;
+      }
+
+      return 0;
+  }
+  ```
+  - Mendeklarasikan variabel `login` dengan <i>value</i> 0 dan `ctr` dengan <i>value</i> 1 sebagai variabel global.
+  - Mendeklarasikan variabel `id_login` dan `password` untuk proses <i>login</i> sebagai variabel global.
+  - Saat <i>client</i> menghentikan aplikasi, mengecek apakah <i>client</i> merupakan <i>client</i> yang sedang <i>login</i> dengan membandingkan <b>ID <i>Thread Client</i></b> dan variabel `id_client_login` menggunakan `pthread_equal`.
+  - Jika sama, maka hapus semua variabel yang berkaitan dengan <i>client</i> yang sedang <i>login</i> dengan `bzero`.
+  - Setelah itu tutup <i>socket</i> dengan `close(*new_socket)`.
+
+  Ketika pengguna menginputkan 1, maka akan masuk ke halaman <i>register</i>.
+  
+  `server.c`
+  ```C
+  if (strcmp(buffer, "1") == 0) { //REGISTER
+       strcpy(message, "Registration\n\nID: ");
+       send(*new_socket, message, strlen(message), 0);
+                
+       char id[100] = {0};
+       char password[100] = {0};
+       valread = recv(*new_socket, id, 100, 0);
+                
+       if (checkClose(valread, new_socket)) {
+            break;
+       }
+
+       strcpy(message, "Password: ");
+       send(*new_socket, message, strlen(message), 0);
+       valread = recv(*new_socket, password, 100, 0);
+                
+       if (checkClose(valread, new_socket)) {
+            break;
+       }
+
+       FILE *fileout;
+       fileout = fopen("akun.txt", "a");
+       char strconcate[200] = {0};
+                
+       strcpy(strconcate, id);
+       strcat(strconcate, ":");
+       strcat(strconcate, password);
+       fputs(strconcate, fileout);
+       fputs("\n", fileout);
+       fclose(fileout);
+
+       printf("Data saved successfully.\n");
+
+       strcpy(message, "Registration success!\n\n");
+       send(*new_socket, message, strlen(message), 0);
+  }
+  ```
+  - <i>Server</i> akan meminta <i>client</i> untuk menginputkan <b>ID</b> dan <b><i>Password</i></b> ke dalam variabel `id` dan `password`. Nantinya <b>ID</b> dan <b><i>Password</i></b> dikirim menggunakan `send` dan akan mendapat pesan balasan yang disimpan di `valread`.
+  - `fopen` digunakan untuk membuka `akun.txt`, menggunakan <i>command</i> `a` agar data yang diinput ditambahkan di bagian akhir teks.
+  - Memasukkan output dengan mengkombinasi `strcpy`, `strcat`, dan `fputs` ke dalam `akun.txt`. Lalu menutup <i>file</i>-nya.
+  - Memunculkan pesan <b>sukses</b> baik di terminal <i>server</i> maupun <i>client</i>.
+
+  Ketika pengguna menginputkan 2, maka akan masuk ke halaman <i>login</i>.
+  
+  `server.c`
+  ```C
+  else if (strcmp(buffer, "2") == 0) { //LOGIN
+       strcpy(message,"Login\n\nID: ");
+       send(*new_socket, message, strlen(message), 0);
+                
+       char id[100] = {0};
+       char password[100] = {0};
+       valread = recv(*new_socket, id, 100, 0);
+                
+       if (checkClose(valread, new_socket)) {
+            break;
+       }
+
+       strcpy(message, "Password: ");
+       send(*new_socket, message, strlen(message), 0);
+       valread = recv(*new_socket, password, 100, 0);
+                
+       if (checkClose(valread, new_socket)) {
+            break;
+       }
+
+       FILE *filein;
+       filein = fopen("akun.txt", "r");
+
+       char temp[100] = {0};
+       char tempId[100] = {0};
+       char tempPassword[100] = {0};
+       bool found = false;
+
+       while ((fscanf(filein, "%[^\n]%*c", temp)) != EOF) { //READS FORMATTED INPUT FROM STREAM (END OF FILE)
+            char *token = strtok(temp, ":"); //BREAKS STRING INTO A SERIES OF TOKENS USING THE DELIMITER ":"
+
+            if (token != NULL) {
+                 strcpy(tempId, token);
+                 token = strtok(NULL, ":");
+            }
+
+            if (token != NULL) {
+                 strcpy(tempPassword, token);
+            }
+
+            if (strcmp(id, tempId) == 0 && strcmp(password, tempPassword) == 0) {
+                 found = true;
+                 break;
+            } 
+       }
+
+       if (login == 0) {
+            if (found) {
+                 strcpy(message, "Login success!\n\n");
+                 send(*new_socket, message, strlen(message), 0);
+                        
+                 id_client_login = pthread_self(); //ID THREAD CLIENT
+                 login = 1;
+                 flag = 1;
+                        
+                 strcpy(id_login, id);
+                 strcpy(password_login, password);
+            }
+                    
+            else {
+                 strcpy(message, "Login failed!\n\n");
+                 send(*new_socket, message, strlen(message), 0);
+            }
+       }
+                
+       else {
+            strcpy(message, "Another client has logged in!\n\n");
+            send(*new_socket, message, strlen(message), 0);
+       }
+  }
+  ```
+  - <i>Server</i> akan meminta <i>client</i> untuk menginputkan <b>ID</b> dan <b><i>Password</i></b> ke dalam variabel `id` dan `password`. Nantinya <b>ID</b> dan <b><i>Password</i></b> dikirim menggunakan `send` dan akan mendapat pesan balasan yang disimpan di `valread`.
+  - `fopen` digunakan untuk membuka `akun.txt`, menggunakan <i>command</i> `r` untuk melakukan proses penginputan.
+  - Mendeklarasikan variabel `temp`, `tempId`, `tempPassword` untuk pencocokan input dengan database yang ada di `akun.txt`.
+  - Mendeklarasikan variabel `found` untuk <i>handling login</i>.
+  - Melakukan `fscanf` sampai dengan <b><i>END OF FILE</i></b> (EOF). Menggunakan `strtok` agar <i>string</i> dipisah menjadi <i>token</i> dengan <i>delimiter</i> `:` untuk  mengambil <b>ID</b> dan <b><i>Password</i></b> yang ada di database. Kemudian, dibandingkan antara input dan database. Jika <b>TRUE</b>, maka <i>value</i> `found` menjadi <b>TRUE</b>.
+  - Varibel `login` digunakan untuk melihat apakah <i>client</i> sudah <i>login</i> atau belum. Jika sudah, maka akan memunculkan pesan bahwa <i>client</i> lain ada yang sedang <i>login</i>, jika belum dan verifikasi berhasil, maka mengubah <i>value</i> `login` menjadi 1 dan variabel `id_client_login` diisi dengan <b>ID <i>Thread Client</i></b> menggunakan fungsi `pthread_self()`. Setelah itu menyalin <b>ID</b> dan <b><i>Password</i></b> ke dalam `id_login` dan `password_login`.
+  - Memunculkan pesan <b>sukses</b> dan <b>gagal</b> baik di terminal <i>server</i> maupun <i>client</i>.
 
 ### 1B ###
 
 - <b>SOAL</b>
 
   Sistem memiliki sebuah <i>database</i> yang bernama `files.tsv`. Isi dari `files.tsv` ini adalah <b><i>path file</i> saat berada di <i>server</i></b>, <b><i>publisher</i></b>, dan <b>tahun publikasi</b>. Setiap penambahan dan penghapusan <i>file</i> pada folder <i>file</i> yang bernama `FILES` pada <i>server</i> akan memengaruhi isi dari `files.tsv`. Folder `FILES` otomatis dibuat saat <i>server</i> dijalankan.
-
 
 ### 1C ###
 
