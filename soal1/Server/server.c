@@ -555,9 +555,7 @@ void *operation(void *arg) {
 
             flag = 1;
         }
-        
     }
-
 }
 
 int main(int argc, char const *argv[]) {
@@ -605,7 +603,7 @@ int main(int argc, char const *argv[]) {
         printf("Client %d is connected\n", ctr);
     }
 
-    for(int i = 0; i < ctr; i++){
+    for (int i = 0; i < ctr; i++) {
         pthread_join(tid[i], NULL);
     }
     
