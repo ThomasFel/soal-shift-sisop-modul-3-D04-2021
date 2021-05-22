@@ -649,8 +649,7 @@ Struktur direktori:
        }
 
        else if (a >= b) {
-            int temp = a - b;
-            result[i][j] = faktorial(a) / faktorial(temp);
+            result[i][j] = faktorial(a) / faktorial(a - b);
        }
 
        else if (b > a) {
@@ -660,7 +659,7 @@ Struktur direktori:
   ```
   - `i` dan `j` di-<i>set</i> dengan baris dan kolom matriks. Lalu `matriksA` dan `matriksB` masing-masing di-<i>set</i> ke `a` dan `b`.
   - Jika `a` dan `b` bernilai 0, <i>value</i> matriks `result[i][j]` akan bernilai 0.
-  - Jika `a` lebih besar sama dengan `b`, mendeklarasikan variabel `temp` untuk menampung hasil pengurangan `a` dan `b` dan matriks `result[i][j]` akan bernilai hasil pembagian `faktorial(a)` dan `faktorial(temp)`.
+  - Jika `a` lebih besar sama dengan `b`, matriks `result[i][j]` akan bernilai hasil pembagian `faktorial(a)` dan `faktorial(a - b)`.
   - Jika `b` lebih besar dari `a`, <i>value</i> matriks `result[i][j]` akan bernilai `faktorial(a)`.
   
   Membuat <i>shared memory</i> untuk `matriks` sesuai dengan <i>template</i> yang ada di modul 3.
