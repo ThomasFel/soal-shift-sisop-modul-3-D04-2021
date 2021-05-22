@@ -10,7 +10,6 @@
 #include <sys/types.h>
 
 #define PORT 8080
-#define MAX_CLIENTS 1000
 
 pthread_t tid[1000], id_client_login;
 
