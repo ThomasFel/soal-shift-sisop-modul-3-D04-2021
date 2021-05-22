@@ -85,7 +85,7 @@ void *operation(void *arg) {
                 fputs("\n", fileout);
                 fclose(fileout);
 
-                printf("Data saved successfully\n");
+                printf("Data saved successfully.\n");
 
                 strcpy(message, "Registration success!\n\n");
                 send(*new_socket, message, strlen(message), 0);
@@ -322,7 +322,7 @@ void *operation(void *arg) {
             if (found) {
                 bzero(message, 1024); //ERASE DATA IN THE 1000 BYTES OF THE MEMORY STARTING AT THE LOCATION POINTED BY MEMORY
                 bzero(buffer, 1024);
-                strcpy(message, "DOWNLOAD PREPARING");
+                strcpy(message, "DOWNLOAD PREPARING...");
                 send(*new_socket, message, strlen(message), 0);
                 valread = recv(*new_socket, buffer, 1024, 0);
 
@@ -349,7 +349,7 @@ void *operation(void *arg) {
             }
             
             else {
-                strcpy(message, "ERROR! File not found\n");
+                strcpy(message, "ERROR! File not found.\n\n");
                 send(*new_socket, message, strlen(message), 0);
             }
 
@@ -422,11 +422,14 @@ void *operation(void *arg) {
                 fprintf(fileout, "Hapus : %s (%s:%s)\n", parameter[1], id_login, password_login);
                 fclose(fileout);
 
-                printf("DELETE SUCCESS.\n");
+                printf("DELETION DONE.\n");
+                strcpy(message, "DELETE SUCCESS.\n\n");
+                send(*new_socket, message, strlen(message), 0);
             }
             
             else {
-                printf("ERROR! File not found\n");
+                strcpy(message, "ERROR! File not found.\n\n");
+                send(*new_socket, message, strlen(message), 0);
             }
 
             flag = 1;
@@ -554,7 +557,7 @@ void *operation(void *arg) {
             fclose(filein);
 
             flag = 1;
-        }
+        }   
     }
 }
 

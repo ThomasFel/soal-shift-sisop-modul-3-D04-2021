@@ -76,7 +76,7 @@ int main(int argc, char const *argv[]) {
         }
         
         //SOAL 1D
-        else if (strcmp(buffer, "DOWNLOAD PREPARING") == 0) {
+        else if (strcmp(buffer, "DOWNLOAD PREPARING...") == 0) {
             printf("\n");
             bzero(message, 1024);
             strcpy(message, "OK1");
