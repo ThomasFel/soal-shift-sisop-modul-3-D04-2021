@@ -18,7 +18,7 @@ char id_login[100] = {0};
 char password_login[100] = {0};
 
 bool checkClose(int valread, int *new_socket) {
-    if (valread == 0){
+    if (valread == 0) {
         if (pthread_equal(pthread_self(), id_client_login)) { //COMPARE 2 THREAD IDENTIFIERS, RETURNS THE ID OF THE CALLING THREAD
             login = 0;
             bzero(id_login, 100); //ERASE DATA IN THE 100 BYTES OF THE MEMORY STARTING AT THE LOCATION POINTED BY ID_LOGIN
