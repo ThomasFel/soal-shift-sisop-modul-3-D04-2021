@@ -347,6 +347,20 @@ Kelompok D-04
   - Varibel `login` digunakan untuk melihat apakah <i>client</i> sudah <i>login</i> atau belum. Jika sudah, maka akan memunculkan pesan bahwa <i>client</i> lain ada yang sedang <i>login</i>, jika belum dan verifikasi berhasil, maka mengubah <i>value</i> `login` menjadi 1 dan variabel `id_client_login` diisi dengan <b>ID <i>Thread Client</i></b> menggunakan fungsi `pthread_self()`. Setelah itu menyalin <b>ID</b> dan <b><i>Password</i></b> ke dalam `id_login` dan `password_login`.
   - Memunculkan pesan <b>sukses</b> dan <b>gagal</b> baik di terminal <i>server</i> maupun <i>client</i>.
 
+- <b>OUTPUT</b>
+
+  <b><i>Register</i></b>
+
+  <img src="https://user-images.githubusercontent.com/37539546/119262651-274b3d00-bc06-11eb-86d7-6bcda8cc734c.png" width="640" height="480">
+
+  <b><i>Login</i></b>
+
+  <img src="https://user-images.githubusercontent.com/37539546/119262632-14386d00-bc06-11eb-9ef2-e16cd35f6ad6.png" width="640" height="480">
+  
+  <b><i>akun.txt</i></b>
+
+  <img src="https://user-images.githubusercontent.com/37539546/119262847-e7d12080-bc06-11eb-87d3-967dfbf9aafc.png" width="640" height="480">
+  
 ### 1B ###
 
 - <b>SOAL</b>
@@ -356,6 +370,13 @@ Kelompok D-04
 - <b>JAWABAN</b>
 
   Seperti yang telah dijelaskan pada sub-soal sebelumnya, folder <b>FILES</b> telah otomatis dibuat sewaktu program dijalankan. Dan pembuatan `files.tsv`-nya akan sekalian masuk ke sub-soal selanjutnya.
+  
+- <b>OUTPUT</b>
+
+  <b><i>Folder FILES otomatis dibuat setelah program jalan</i></b>
+
+  <img src="https://user-images.githubusercontent.com/37539546/119262717-67122480-bc06-11eb-9098-f20351b1ed34.png" width="640" height="480">
+
 
 ### 1C ###
 
@@ -517,6 +538,17 @@ Kelompok D-04
   }
   ```
   <i>Server</i> akan menulis tiap baris ke suatu <i>file</i> menggunakan `fputs` dan merespon dengan pesan `OK` untuk tiap barisnya hingga server menerima pesan `DONE`. Setelah itu server menambahkan <i>record</i> untuk <i>file</i> yang diinputkan pada `files.tsv` dan dengan `fprintf(fileout,"%s\t%s\t%s\n", filePath, publisher, year)` untuk menyimpan output sesuai dengan permintaan soal. Tidak lupa mengubah <i>value</i> `flag` agar kembali ke proses <i>command</i>. Terakhir, memunculkan pesan <b>sukses</b> di terminal <i>server</i> maupun <i>client</i>.
+
+- <b>OUTPUT</b>
+
+  <b><i>Command ADD dijalankan</i></b>
+
+  <img src="https://user-images.githubusercontent.com/37539546/119262757-9a54b380-bc06-11eb-8b3b-a3281f5c8922.png" width="640" height="480">
+  
+  <b><i>files.tsv</i></b>
+
+  <img src="https://user-images.githubusercontent.com/37539546/119262825-cf610600-bc06-11eb-8cba-bdd51b66c6a7.png" width="640" height="480">
+
   
 ### 1D ###
 
@@ -675,6 +707,16 @@ Kelompok D-04
   ```
   <i>Server</i> akan mengirimkan pesan ke <i>client</i> ketika <i>file</i> ditemukan, lalu juga akan mengirimkan <i>filename</i>. Setelah itu, <i>client</i> akan mengirimkan <i>file</i> baris per baris menggunakan `fgets`. Proses ini berakhir ketika <i>client</i> mengirimkan pesan `DONE`.
 
+- <b>OUTPUT</b>
+
+  <b><i>Folder client dikosongkan</i></b>
+
+  <img src="https://user-images.githubusercontent.com/37539546/119262985-6ded6700-bc07-11eb-8926-0401370e7238.png" width="640" height="480">
+  
+  <b><i>Command DOWNLOAD dijalankan</i></b>
+  
+  <img src="https://user-images.githubusercontent.com/37539546/119262963-531af280-bc07-11eb-962f-6a72faa3735f.png" width="640" height="480">
+  
 ### 1E ###
 
 - <b>SOAL</b>
@@ -805,6 +847,20 @@ Kelompok D-04
   }
   ```
   Ketika <i>file</i> ditemukan, ubah nama <i>file</i> tersebut dengan mendapat awalan `old-` menggunakan fungsi `rename` yang didapat dari kombinasi `strcpy` dan `strcat`. Lalu, membuat semacam <i>file dummy</i>, `tempFiles.tsv` untuk seluruh baris kecuali baris yang dihapus. Setelah itu `files.tsv` yang lama dihapus dengan fungsi `remove` dan <i>file dummy</i>, `tempFiles.tsv` di-<i>rename</i> menjadi `files.tsv`. Terakhir, memunculkan pesan <b>sukses</b> di terminal <i>server</i> maupun <i>client</i>.
+
+- <b>OUTPUT</b>
+
+  <b><i>Folder FILES sebelum menjalankan DELETE</i></b>
+
+  <img src="https://user-images.githubusercontent.com/37539546/119263015-91181680-bc07-11eb-9fe9-96ec4440ec3a.png" width="640" height="480">
+  
+  <b><i>Command DELETE dijalankan</i></b>
+
+  <img src="https://user-images.githubusercontent.com/37539546/119263030-9e350580-bc07-11eb-810f-cf548ee09b5e.png" width="640" height="480">
+  
+  <b><i>files.tsv</i></b>
+
+  <img src="https://user-images.githubusercontent.com/37539546/119263056-b573f300-bc07-11eb-9f6b-16111e58eb80.png" width="640" height="480">
   
 ### 1F ###
 
@@ -929,6 +985,12 @@ Kelompok D-04
   ```
   Saat menerima input `see`, <i>client</i> akan menerima pesan terus menerus dari <i>server</i>. Proses ini berakhir ketika <i>client</i> mengirimkan pesan `DONE`.
 
+- <b>OUTPUT</b>
+  
+  <b><i>Command SEE dijalankan</i></b>
+  
+  <img src="https://user-images.githubusercontent.com/37539546/119263090-dccac000-bc07-11eb-9ac4-c747dcfb0c42.png" width="640" height="480">
+  
 ### 1G ###
 
 - <b>SOAL</b>
@@ -1039,6 +1101,12 @@ Kelompok D-04
   }	    
   ```
   Saat menerima input `find` (dapat dicek menggunakan `strstr`), <i>client</i> akan menerima pesan terus menerus dari <i>server</i>. Proses ini berakhir ketika <i>client</i> mengirimkan pesan `DONE`.
+
+- <b>OUTPUT</b>
+  
+  <b><i>Command FIND dijalankan</i></b>
+
+  <img src="https://user-images.githubusercontent.com/37539546/119263118-eeac6300-bc07-11eb-92c6-11dd869df187.png" width="640" height="480">
   
 ### 1H ###
 
@@ -1113,8 +1181,14 @@ Kelompok D-04
        fclose(fileout);
   }
   ```
-  Saat <i>server</i> sudah selesai menghapus <i>file</i>, maka akan membuka `running.log` dan menggunakan <i>command</i> `a` agar data yang diinput ditambahkan di bagian akhir teks. Kemudian, menulis log dengan menggunakan `fprintf` sesuai format yang diminta soal. <b>ID</b> dan <i><b>Password</b> Client</i> diperoleh dari variabel global `id_login` dan `password_login.
+  Saat <i>server</i> sudah selesai menghapus <i>file</i>, maka akan membuka `running.log` dan menggunakan <i>command</i> `a` agar data yang diinput ditambahkan di bagian akhir teks. Kemudian, menulis log dengan menggunakan `fprintf` sesuai format yang diminta soal. <b>ID</b> dan <i><b>Password</b> Client</i> diperoleh dari variabel global `id_login` dan `password_login`.
 
+- <b>OUTPUT</b>
+  
+  <b><i>running.log</i></b>
+
+  <img src="https://user-images.githubusercontent.com/37539546/119263137-008e0600-bc08-11eb-93d6-3470d7638a69.png" width="640" height="480">
+  
 ## SOAL 2 ##
 
 ### 2A ###
@@ -1227,6 +1301,10 @@ Kelompok D-04
   ```
   Membuat terlebih dahulu <i>key</i>-nya. <i>Pointer</i> `p` menunjuk tiap isi array matriks dan dilakukan penyalinan data dengan `memcpy` melalui variabel <i>pointer</i> `p` terhadap variabel matriks hasil agar variabel matriks hasil yang memorinya di-<i>share</i> berisi hasil matriks yang telah dikalikan. Dan untuk mengakhiri <i>shared memory</i> yang sedang berlangsung digunakan `shmctl`.
 
+- <b>OUTPUT</b>
+
+  <img src="https://user-images.githubusercontent.com/37539546/119262248-b6efec00-bc04-11eb-8a77-c89e05a7f159.png" width="640" height="480">
+  
 ### 2B ###
 
 - <b>SOAL</b>
@@ -1382,6 +1460,10 @@ Kelompok D-04
   shmctl(shmid, IPC_RMID, NULL);
   ```
   <i>Print</i> dengan `printf("%4llu ", result[i][j])` untuk tiap baris dan kolom menggunakan <i>counter</i> `i` dan `j` dan <i>increment</i> sebanyak jumlah baris, yaitu 4 dan jumlah kolom, yaitu 6. `%4llu` di sini adalah untuk banyak karakter <b>unsigned long long</b> yang akan dicetak dari matriks `result[i][j]`. Dan untuk mengakhiri <i>shared memory</i> yang sedang berlangsung digunakan `shmctl`.
+
+- <b>OUTPUT</b>
+
+  <img src="https://user-images.githubusercontent.com/37539546/119262434-704ec180-bc05-11eb-81d6-0170652173a9.png" width="640" height="480">
   
 ### 2C ###
 
@@ -1489,7 +1571,10 @@ Kelompok D-04
   }
   ```
   Terakhir, melakukan looping dari 0 sampai 2 (sesuai jumlah <i>process</i>) untuk melakukan proses `wait` untuk menunda eksekusi <i>process</i> yang berjalan hingga salah satu <i>child</i>-nya <i>terminate</i>.
-  
+
+- <b>OUTPUT</b>
+
+  <img src="https://user-images.githubusercontent.com/37539546/119262474-92e0da80-bc05-11eb-86a4-6e87deae1b91.png" width="640" height="480">
   
 ## SOAL 3 ##
 
