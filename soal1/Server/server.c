@@ -247,7 +247,7 @@ void *operation(void *arg) {
             char year[100] = {0};
             valread = recv(*new_socket, year, 100, 0);
             
-            if (checkClose(valread,new_socket)) {
+            if (checkClose(valread, new_socket)) {
                 break;
             }
 
