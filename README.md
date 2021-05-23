@@ -1520,9 +1520,9 @@ Kelompok D-04
        
             if (access(argv[i], F_OK) == 0)
             {
-	         	pthread_create(&tid[count], NULL, kategori, (void *)argv[i]);
-	         	count++;
-			printf("File %d : Berhasil Dikategorikan\n", i-1);
+	             pthread_create(&tid[count], NULL, kategori, (void *)argv[i]);
+	             count++;
+		       printf("File %d : Berhasil Dikategorikan\n", i-1);
             }
 
             else 
