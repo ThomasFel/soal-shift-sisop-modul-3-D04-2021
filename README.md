@@ -405,6 +405,7 @@ Kelompok D-04
   
   . . .
   
+  }
   ```
   - Jika `flag` mempunyai <i>value</i> 1, maka akan menampilkan halaman <i>command</i>. Menggunakan `strcpy` untuk menyalin <i>string</i> yang akan dimunculkan di terminal ke variabel `message`. Lalu, mengirimkan pesan ke <i>client</i> dan nantinya `valread` akan menerima pesan balasan dari <i>socket</i>. Setelah itu, jika fungsi `checkClose` bernilai <b>TRUE</b> akan menghentikan <i>looping</i>.
   - Jika <i>command</i> yang diinputkan adalah `add`, maka `flag` bernilai 2 untuk masuk ke pengondisian `add`.
@@ -481,16 +482,17 @@ Kelompok D-04
        }
             
        printf("SENDING DONE.\n\n");
-            strcpy(message, "DONE");
-            send(sock, message, strlen(message), 0);
+       strcpy(message, "DONE");
+       send(sock, message, strlen(message), 0);
   }
   ```
   <i>Client</i> akan memecah <b><i>filepath</i></b> yang diinputkan untuk memperoleh nama <i>file</i> yang akan dikirim ke server menggunakan `strtok`. Setelah itu, <i>client</i> akan mengirimkan <i>file</i> baris per baris menggunakan `fgets`. Setiap baris yang dikirimkan server akan menunggu respon dari server yang akan menjawab `OK`. Proses ini berakhir ketika <i>client</i> mengirimkan pesan `DONE`.
   
   Lanjutan proses <i>server</i> untuk soal [soal.1c](#1c "Goto 1c").
+  
   `server.c`
   ```C
-  if (flag == 2) { //COMMAND "ADD" {
+  if (flag == 2) { //COMMAND "ADD"
        do {   
             bzero(temp, 1000); //ERASE DATA IN THE 1000 BYTES OF THE MEMORY STARTING AT THE LOCATION POINTED BY TEMP
             valread = recv(*new_socket, temp, 1000, 0);
@@ -527,6 +529,131 @@ Kelompok D-04
   download TEMPfile.pdf
   ```
 
+- <b>JAWABAN</b>
+  
+  Proses <i>client</i> ketika soal [soal.1d](#1d "Goto 1d") dijalankan.
+  
+  `client.c`
+  ```C
+  else if (strcmp(buffer, "DOWNLOAD PREPARING...") == 0) {
+       printf("\n");
+       bzero(message, 1024);
+       strcpy(message, "OK1");
+       send(sock, message, strlen(message), 0);
+
+       char temp[1000] = {0}, fileName[1024] = {0};
+       valread = recv(sock, fileName, 1024, 0);
+       
+       bzero(message, 1024);
+       strcpy(message, "OK2");
+       send(sock, message, strlen(message), 0);
+
+       do {   
+            bzero(temp, 1000);
+            valread = recv(sock, temp, 1000, 0);
+                
+            if (strcmp(temp, "DONE") != 0) {
+                 FILE *fileout;
+                 fileout = fopen(fileName, "a");
+                 fputs(temp, fileout);
+                 fclose(fileout);
+                 strcpy(message, "OK");
+                 send(sock, message, strlen(message), 0);
+            }
+       } while(strcmp(temp, "DONE") != 0);
+            
+       strcpy(message, "OK");
+       send(sock, message, strlen(message), 0);
+       printf("DOWNLOAD SUCCESS.\n\n");
+  }
+  ```
+  Dengan proses yang sama pada [soal.1c](#1c "Goto 1c"), <i>client</i> akan melakukan pengecekan nama <i>file</i>. Setiap nama <i>file</i> yang dikirimkan server akan menunggu respon dari server yang akan menjawab `OK`. Proses ini berakhir ketika <i>client</i> mengirimkan pesan `DONE`.
+  
+  Pengondisian <i>command</i> `download`.
+  
+  `server.c`
+  ```C
+  if (flag == 3) { //COMMAND "DOWNLOAD"
+       //DB CHECK
+       FILE *filein;
+       filein = fopen("files.tsv", "r");
+       char search[1000] = {0};
+       strcpy(search, "FILES/");
+       strcat(search, parameter[1]);
+
+       char temp[1000] = {0};
+       char filePath[100] = {0};
+       bool found = false;
+            
+       while ((fscanf(filein, "%[^\n]%*c", temp)) != EOF) {
+            char *token = strtok(temp, "\t");
+                
+            if (token != NULL) {
+                 strcpy(filePath, token);
+            }
+                
+            if (strcmp(search, filePath) == 0) {
+                 found = true;
+                 break;
+            }
+       }
+       
+       fclose(filein);
+  
+  . . .
+  
+  else {
+       strcpy(message, "ERROR! File not found.\n\n");
+       send(*new_socket, message, strlen(message), 0);
+  }
+
+       flag = 1;
+  }
+  ```
+  <i>Server</i> melakukan pengecekan apakah <i>file</i> yang terunduh terdapat pada database `files.tsv`. Menggunakan `strtok` untuk mengambil <b><i>filepath</i></b>-nya. Jika <i>file</i> ditemukan maka akan langsung masuk kondisi `found` bernilai <b><i>TRUE</i></b>. Jika tidak ditemukan, maka akan memunculkan pesan <b><i>ERROR</i></b>. Tidak lupa mengubah <i>value</i> `flag` agar kembali ke proses <i>command</i>.
+ 
+  Proses ketika `found` berjalan.
+  
+  `server.c`
+  ```C
+  if (flag == 3) { //COMMAND "DOWNLOAD"
+     
+       . . .
+     
+       if (found) {
+            bzero(message, 1024); //ERASE DATA IN THE 1000 BYTES OF THE MEMORY STARTING AT THE LOCATION POINTED BY MEMORY
+            bzero(buffer, 1024);
+            strcpy(message, "DOWNLOAD PREPARING...");
+            send(*new_socket, message, strlen(message), 0);
+            valread = recv(*new_socket, buffer, 1024, 0);
+
+            bzero(message, 1024);
+            bzero(buffer, 1024);
+
+            //SEND FILENAME
+            strcpy(message, parameter[1]);
+            send(*new_socket, message, strlen(message), 0);
+            valread = recv(*new_socket, buffer, 1024, 0);
+
+            FILE *filein;
+            filein = fopen(filePath, "r");
+
+            while (fgets(temp, 1000, filein)) {
+                 send(*new_socket, temp, strlen(temp), 0);
+                 valread = recv(*new_socket, buffer, 1024, 0);
+            }
+
+            printf("SENDING DONE.\n");
+            strcpy(message, "DONE");
+            send(*new_socket, message, strlen(message), 0);
+            valread = recv(*new_socket, buffer, 1024, 0);
+  
+  . . .
+  
+  }
+  ```
+  <i>Server</i> akan mengirimkan pesan ke <i>client</i> ketika <i>file</i> ditemukan, lalu juga akan mengirimkan <i>filename</i>. Setelah itu, <i>client</i> akan mengirimkan <i>file</i> baris per baris menggunakan `fgets`. Proses ini berakhir ketika <i>client</i> mengirimkan pesan `DONE`.
+
 ### 1E ###
 
 - <b>SOAL</b>
@@ -537,6 +664,8 @@ Kelompok D-04
   ```
   delete TEMPfile.pdf
   ```
+
+- <b>JAWABAN</b>
 
 ### 1F ###
 
@@ -564,6 +693,8 @@ Kelompok D-04
   Filepath :
   ```
 
+- <b>JAWABAN</b>
+
 ### 1G ###
 
 - <b>SOAL</b>
@@ -575,6 +706,8 @@ Kelompok D-04
   find TEMP
   ```
 
+- <b>JAWABAN</b>
+
 ### 1H ###
 
 - <b>SOAL</b>
@@ -585,6 +718,11 @@ Kelompok D-04
   ```
   Tambah : File1.ektensi (id:pass)
   Hapus : File2.ektensi (id:pass)
+  ```
+- <b>JAWABAN</b>
+
+  ```C
+  
   ```
 
 Struktur direktori:
