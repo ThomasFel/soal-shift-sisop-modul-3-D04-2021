@@ -1188,7 +1188,14 @@ Kelompok D-04
   <b><i>running.log</i></b>
 
   <img src="https://user-images.githubusercontent.com/37539546/119263137-008e0600-bc08-11eb-93d6-3470d7638a69.png" width="640" height="480">
-  
+
+### KENDALA ###
+ 
+- Kesulitan sewaktu <i>debug</i> `server.c` maupun `client.c`.
+- Tingkat kesulitan soal seperti membuat CRUD.
+- Kehabisan waktu saat praktikum karena mengerjakan 2 nomor dan saat itu juga pekan ETS.
+- <i>Error segmentation fault</i> :(
+
 ## SOAL 2 ##
 
 ### 2A ###
@@ -1575,7 +1582,13 @@ Kelompok D-04
 - <b>OUTPUT</b>
 
   <img src="https://user-images.githubusercontent.com/37539546/119262474-92e0da80-bc05-11eb-86a4-6e87deae1b91.png" width="640" height="480">
-  
+
+### KENDALA ###
+ 
+- Deskripsi pada [soal.2b](#2b "Goto 2b") agak membingungkan, ternyata menggunakan matriks baru untuk menghitung faktorial matriks hasil perkalian dari [soal.2b](#2a "Goto 2a").
+- Program [soal.2c](#2c "Goto 2c") tidak jalan ketika memakai <i>template pipes</i>, entah kenapa. Terpaksa memakai <i>template</i> yang ada di internet.
+- Bingung untuk <i>shared memory</i> pada <i>array</i> 2D. 
+
 ## SOAL 3 ##
 
 ### 3A ###
@@ -1895,3 +1908,8 @@ Kelompok D-04
   }
   ```
   <i>Looping</i> tersebut berfungsi untuk terus menambah <i>thread</i> pada setiap eksekusi <i>file</i> sehingga setiap <i>file</i> berjalan di satu <i>thread</i> dan program bisa berjalan dengan lebih efisien.
+
+### KENDALA ###
+ 
+- Kesulitan saat meng-<i>update path</i> baru.
+- Kesulitan saat menjalankan 1 <i>file</i> 1 <i>thread</i>.
