@@ -833,6 +833,101 @@ Kelompok D-04
   ```
 
 - <b>JAWABAN</b>
+  
+  Pengondisian <i>command</i> `see`.
+  
+  `server.c`
+  ```C
+  if (flag == 5) { //COMMAND "SEE"
+       FILE *filein;
+       filein = fopen("files.tsv", "r");
+
+       char temp[1000] = {0};
+       char filePath[100] = {0}, publisher[100] = {0}, year[100] = {0}, name[100] = {0}, ext[100] = {0};
+
+       while ((fscanf(filein, "%[^\n]%*c", temp)) != EOF) {
+            char *token = strtok(temp, "\t");
+
+            if (token != NULL) {
+                 strcpy(filePath, token);
+                 token = strtok(NULL, "\t");
+            }
+
+            if (token != NULL) {
+                 strcpy(publisher, token);
+                 token = strtok(NULL, "\t");
+            }
+
+            if (token != NULL){
+                 strcpy(year, token);
+            }
+
+            token = strtok(temp, "/");
+            token = strtok(NULL, ".");
+            strcpy(name, token);
+            token = strtok(NULL, ".");
+            strcpy(ext,token);
+
+            strcpy(message, "Nama: ");
+            strcat(message, name);
+            strcat(message, "\n");
+            strcat(message, "Publisher: ");
+            strcat(message, publisher);
+            strcat(message, "\n");
+            strcat(message, "Tahun publishing: ");
+            strcat(message, year);
+            strcat(message, "\n");
+            strcat(message, "Ekstensi: ");
+            strcat(message, ext);
+            strcat(message, "\n");
+            strcat(message, "Filepath: ");
+            strcat(message, filePath);
+            strcat(message, "\n");
+            send(*new_socket, message, strlen(message), 0 );
+
+            valread = recv(*new_socket, buffer, 1000, 0);
+       }
+
+       strcpy(message, "DONE");
+       send(*new_socket, message, strlen(message), 0);
+       valread = recv(*new_socket, buffer, 1000, 0);
+            
+       fclose(filein);
+
+       flag = 1;
+  }
+  ```
+  <i>Server</i> melakukan pembacaan terhadap database `files.tsv` baris per baris dengan `fscanf(filein, "%[^\n]%*c", temp)) != EOF`. Menggunakan `strtok` dengan delimiter `\t` (tab) untuk mengambil <b><i>filepath</i></b>, <b>publisher</b>, dan <b>tahun publikasi</b>. Lalu dipecah lagi dengan delimiter `/` dan `.` sehingga bisa diperoleh ekstensi <i>file</i>-nya. Mengkombinasi `strcpy` dan `strcat` untuk mengeluarkan output sesuai dengan permintaan soal. Setelah selesai, server akan mengirimkan pesan `DONE`. Tidak lupa mengubah <i>value</i> `flag` agar kembali ke proses <i>command</i>.
+  
+  Proses <i>client</i> ketika soal [soal.1f](#1f "Goto 1f") dijalankan.
+  
+  `client.c`
+  ```C
+  else {
+       scanf("%[^\n]%*c", message);
+       send(sock, message, strlen(message), 0);
+  
+       if (strcmp(message, "see") == 0) {
+            do {
+                 bzero(buffer,1024);
+                 valread = read(sock, buffer, 1024);
+                
+                 if (strcmp(buffer, "DONE") != 0) {
+                      printf("%s\n", buffer);
+                      strcpy(message, "OK");
+                      send(sock, message, strlen(message) , 0);
+                 }
+            } while(strcmp(buffer, "DONE") != 0);
+
+            strcpy(message, "OK");
+            send(sock, message, strlen(message), 0);
+       }
+  
+  . . .
+  
+  }
+  ```
+  Saat menerima input `see`, <i>client</i> akan menerima pesan terus menerus dari <i>server</i>. Proses ini berakhir ketika <i>client</i> mengirimkan pesan `DONE`.
 
 ### 1G ###
 
