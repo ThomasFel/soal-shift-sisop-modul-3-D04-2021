@@ -281,11 +281,11 @@ void *operation(void *arg) {
 
             FILE *fileout;
             fileout = fopen("files.tsv", "a");
-            fprintf(fileout,"%s\t%s\t%s\n", filePath, publisher, year);
+            fprintf(fileout, "%s\t%s\t%s\n", filePath, publisher, year);
             fclose(fileout);
 
             fileout = fopen("running.log", "a");
-            fprintf(fileout,"Tambah : %s (%s:%s)\n", fileName, id_login, password_login);
+            fprintf(fileout, "Tambah : %s (%s:%s)\n", fileName, id_login, password_login);
             fclose(fileout);
         }
         
