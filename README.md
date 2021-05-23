@@ -530,6 +530,27 @@ Kelompok D-04
   ```
 
 - <b>JAWABAN</b>
+
+  Proses untuk menerima inputan dari terminal.
+  
+  `server.c`
+  ```C
+  char *ret;
+  ret = strstr(buffer, "download"); //FIND THE FIRST OCURRENCE OF THE SUBSTRING "DOWNLOAD" IN BUFFER
+                
+  if (ret) {
+       char *token = strtok(buffer, " ");
+
+       while (token != NULL) {
+            strcpy(parameter[index], token);
+            index++;
+            token = strtok(NULL, " ");
+       }
+
+       flag = 3;
+  }
+  ```
+  Karena <i>command</i> terdiri dari dua kata, maka harus dipecah menggunakan `strtok` dengan delimiter ` ` sehingga bisa diperoleh nama <i>file</i> yang ingin diunduh, kemudian disimpan ke variabel `parameter`. Lalu <i>assign</i> variabel `flag` dengan 3 untuk masuk ke pengondisian <i>command</i> `download`.
   
   Proses <i>client</i> ketika soal [soal.1d](#1d "Goto 1d") dijalankan.
   
@@ -610,7 +631,7 @@ Kelompok D-04
        flag = 1;
   }
   ```
-  <i>Server</i> melakukan pengecekan apakah <i>file</i> yang terunduh terdapat pada database `files.tsv`. Menggunakan `strtok` untuk mengambil <b><i>filepath</i></b>-nya. Jika <i>file</i> ditemukan maka akan langsung masuk kondisi `found` bernilai <b><i>TRUE</i></b>. Jika tidak ditemukan, maka akan memunculkan pesan <b><i>ERROR</i></b>. Tidak lupa mengubah <i>value</i> `flag` agar kembali ke proses <i>command</i>.
+  <i>Server</i> melakukan pengecekan apakah <i>file</i> yang akan diunduh terdapat pada database `files.tsv`. Menggunakan `strtok` untuk mengambil <b><i>filepath</i></b>-nya. Jika <i>file</i> ditemukan maka akan langsung masuk kondisi `found` bernilai <b><i>TRUE</i></b>. Jika tidak ditemukan, maka akan memunculkan pesan <b><i>ERROR</i></b>. Tidak lupa mengubah <i>value</i> `flag` agar kembali ke proses <i>command</i>.
  
   Proses ketika `found` berjalan.
   
@@ -618,7 +639,7 @@ Kelompok D-04
   ```C
   if (flag == 3) { //COMMAND "DOWNLOAD"
      
-       . . .
+  . . .
      
        if (found) {
             bzero(message, 1024); //ERASE DATA IN THE 1000 BYTES OF THE MEMORY STARTING AT THE LOCATION POINTED BY MEMORY
@@ -667,6 +688,124 @@ Kelompok D-04
 
 - <b>JAWABAN</b>
 
+  Proses untuk menerima inputan dari terminal.
+  
+  `server.c`
+  ```C
+  ret = strstr(buffer, "delete");
+                
+  if (ret) {
+       char *token = strtok(buffer, " ");
+
+       while (token != NULL) {
+            strcpy(parameter[index], token);
+            index++;
+            token = strtok(NULL, " ");
+       }
+
+       flag = 4;
+  }
+  ```
+  Karena <i>command</i> terdiri dari dua kata, maka harus dipecah menggunakan `strtok` dengan delimiter ` ` sehingga bisa diperoleh nama <i>file</i> yang ingin diunduh, kemudian disimpan ke variabel `parameter`. Lalu <i>assign</i> variabel `flag` dengan 4 untuk masuk ke pengondisian <i>command</i> `delete`.
+  
+  Pengondisian <i>command</i> `delete`.
+  
+  `server.c`
+  ```C
+  if (flag == 4) { //COMMAND "DELETE"
+       //DB CHECK
+       FILE *filein;
+       filein = fopen("files.tsv", "r");
+       char search[1000] = {0};
+       strcpy(search, "FILES/");
+       strcat(search, parameter[1]);
+
+       char temp[1000] = {0};
+       char filePath[100]= {0};
+       bool found = false;
+            
+       while ((fscanf(filein, "%[^\n]%*c", temp)) != EOF) {
+            char *token = strtok(temp, "\t");
+            if (token != NULL) {
+                 strcpy(filePath, token);
+            }
+                
+            if (strcmp(search, filePath) == 0) {
+                 found = true;
+                 break;
+            }
+       }
+
+       fclose(filein);
+  
+  . . .
+  
+       else {
+            strcpy(message, "ERROR! File not found.\n\n");
+            send(*new_socket, message, strlen(message), 0);
+       }
+       
+       flag = 1;
+  }
+  ```
+  <i>Server</i> melakukan pengecekan apakah <i>file</i> yang akan dihapus terdapat pada database `files.tsv`. Menggunakan `strtok` untuk mengambil <b><i>filepath</i></b>-nya. Jika <i>file</i> ditemukan maka akan langsung masuk kondisi `found` bernilai <b><i>TRUE</i></b>. Jika tidak ditemukan, maka akan memunculkan pesan <b><i>ERROR</i></b>. Tidak lupa mengubah <i>value</i> `flag` agar kembali ke proses <i>command</i>.
+  
+  Proses ketika `found` berjalan.
+  
+  `server.c`
+  ```C
+  if (flag == 4) { //COMMAND "DELETE"
+  
+  . . .
+  
+       if (found) {
+            char fileDelete[100] = {0}, newName[100]= {0};
+            strcpy(fileDelete, "FILES/");
+            strcat(fileDelete, parameter[1]);
+            strcpy(newName, "FILES/old-");
+            strcat(newName, parameter[1]);
+            rename(fileDelete, newName);
+
+            FILE *fileout;
+            filein = fopen("files.tsv", "r");
+
+            //DUMMY FILE
+            fileout = fopen("tempFiles.tsv", "w");
+            fclose(fileout);
+
+            while ((fscanf(filein, "%[^\n]%*c", temp)) != EOF) {
+                 char temp2[100] = {0};
+                 strcpy(temp2, temp);
+                 char *token = strtok(temp,"\t");
+                    
+                 if (token != NULL) {
+                      strcpy(filePath, token);
+                 }
+
+                 if (strcmp(search, filePath) != 0) {
+                      fileout = fopen("tempFiles.tsv", "a");
+                      fputs(temp2, fileout);
+                      fputs("\n", fileout);
+                      fclose(fileout);
+                 }
+            }
+
+            remove("files.tsv");
+            rename("tempFiles.tsv", "files.tsv");
+
+            . . .
+
+            printf("DELETION DONE.\n");
+            strcpy(message, "DELETE SUCCESS.\n\n");
+            send(*new_socket, message, strlen(message), 0);
+       }
+  
+  . . .
+  
+  }
+  ```
+  Ketika <i>file</i> ditemukan, ubah nama <i>file</i> tersebut dengan mendapat awalan `old-` menggunakan fungsi `rename` yang didapat dari kombinasi `strcpy` dan `strcat`. Lalu, membuat semacam <i>file dummy</i>, `tempFiles.tsv` untuk seluruh baris kecuali baris yang dihapus. Setelah itu `files.tsv` yang lama dihapus dengan fungsi `remove` dan <i>file dummy</i>, `tempFiles.tsv` di-<i>rename</i> menjadi `files.tsv`. Terakhir, memunculkan pesan <b>sukses</b> di terminal <i>server</i> maupun <i>client</i>.
+  
 ### 1F ###
 
 - <b>SOAL</b>
