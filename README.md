@@ -352,6 +352,10 @@ Kelompok D-04
 - <b>SOAL</b>
 
   Sistem memiliki sebuah <i>database</i> yang bernama `files.tsv`. Isi dari `files.tsv` ini adalah <b><i>path file</i> saat berada di <i>server</i></b>, <b><i>publisher</i></b>, dan <b>tahun publikasi</b>. Setiap penambahan dan penghapusan <i>file</i> pada folder <i>file</i> yang bernama `FILES` pada <i>server</i> akan memengaruhi isi dari `files.tsv`. Folder `FILES` otomatis dibuat saat <i>server</i> dijalankan.
+  
+- <b>JAWABAN</b>
+
+  Seperti yang telah dijelaskan pada sub-soal sebelumnya, folder <b>FILES</b> telah otomatis dibuat sewaktu program dijalankan. Dan pembuatan `files.tsv`-nya akan sekalian masuk ke sub-soal selanjutnya.
 
 ### 1C ###
 
@@ -378,6 +382,139 @@ Kelompok D-04
   ```
   
   Kemudian, dari aplikasi <i>client</i> akan dimasukkan data buku tersebut (perlu diingat bahwa <i>Filepath</i> ini merupakan <b><i>path file</i> yang akan dikirim ke <i>server</i></b>). Lalu <i>client</i> nanti akan melakukan pengiriman <i>file</i> ke aplikasi <i>server</i> dengan menggunakan socket. Ketika <i>file</i> diterima di <i>server</i>, maka <i>row</i> dari `files.tsv` akan bertambah sesuai dengan data terbaru yang ditambahkan.
+
+- <b>JAWABAN</b>
+  
+  Membuat pengondisian untuk halaman <i>command</i> ketika program dijalankan.
+  
+  `server.c`
+  ```C
+  if (flag == 1) { //COMMAND INPUT
+       strcpy(message, "Command: ");
+       send(*new_socket, message, strlen(message), 0);
+            
+       valread = recv(*new_socket, buffer, 100, 0);
+
+       if (checkClose(valread, new_socket)) {
+            break;
+       }
+
+       if (strcmp("add", buffer) == 0) {
+            flag = 2;
+       }
+  
+  . . .
+  
+  ```
+  - Jika `flag` mempunyai <i>value</i> 1, maka akan menampilkan halaman <i>command</i>. Menggunakan `strcpy` untuk menyalin <i>string</i> yang akan dimunculkan di terminal ke variabel `message`. Lalu, mengirimkan pesan ke <i>client</i> dan nantinya `valread` akan menerima pesan balasan dari <i>socket</i>. Setelah itu, jika fungsi `checkClose` bernilai <b>TRUE</b> akan menghentikan <i>looping</i>.
+  - Jika <i>command</i> yang diinputkan adalah `add`, maka `flag` bernilai 2 untuk masuk ke pengondisian `add`.
+
+  Pengondisian <i>command</i> `add`.
+  
+  `server.c`
+  ```C
+  if (flag == 2) { //COMMAND "ADD"
+       strcpy(message, "Publisher: ");
+       send(*new_socket, message, strlen(message), 0);
+       char publisher[100] = {0};
+       valread = recv(*new_socket, publisher, 100, 0);
+            
+       if (checkClose(valread, new_socket)) {
+            break;
+       }
+
+       strcpy(message, "Tahun Publikasi: ");
+       send(*new_socket, message , strlen(message) , 0);
+       char year[100] = {0};
+       valread = recv(*new_socket, year, 100, 0);
+            
+       if (checkClose(valread, new_socket)) {
+            break;
+       }
+
+       strcpy(message, "Filepath: ");
+       send(*new_socket, message, strlen(message), 0);
+            
+       char temp[1000] = {0}, fileName[1024] = {0}, filePath[1024] = {0};
+       valread = recv(*new_socket, fileName, 1024, 0);
+       strcpy(message, "OK");
+       send(*new_socket, message, strlen(message), 0);
+
+       strcpy(filePath, "FILES/");
+       strcat(filePath, fileName);
+
+  . . .
+  
+  }
+  ```
+  <i>Server</i> akan meminta <i>client</i> untuk menginputkan <b>publisher</b>, <b>tahun publikasi</b>, dan <b><i>filepath</i></b> ke dalam variabel `publisher`, `year` dan `fileName`. Nantinya <b>publisher</b>, <b>tahun publikasi</b>, dan <b><i>filepath</i></b> dikirim menggunakan `send` dan akan mendapat pesan balasan yang disimpan di `valread`. Untuk <b><i>filepath</i></b> menggunakan `strcpy` dan `strcat` untuk memunculkan output agar sesuai yang diharapkan soal.
+  
+  Proses <i>client</i> ketika soal [soal.1c](#1c "Goto 1c") dijalankan.
+  
+  `client.c`
+  ```C
+  if (strcmp(buffer, "Filepath: ") == 0) {
+       char filePath[1024] = {0};
+       scanf("%[^\n]%*c", filePath);
+
+       //SEND FILENAME
+       char tempfilePath[1024] = {0};
+       strcpy(tempfilePath, filePath);
+       char *token = strtok(tempfilePath, "/");
+       char namaFile[1024] = {0};
+            
+       while (token) {
+            strcpy(namaFile, token);
+            token = strtok(NULL, "/");
+       }
+
+       send(sock, namaFile, strlen(namaFile), 0);
+       valread = read(sock, buffer, 1024);
+
+       FILE *filein;
+       filein = fopen(filePath, "r");
+       char temp[1000] = {0};
+
+       while (fgets(temp, 1000, filein)) {
+            send(sock, temp, strlen(temp), 0);
+            valread = read(sock, buffer, 1024);
+       }
+            
+       printf("SENDING DONE.\n\n");
+            strcpy(message, "DONE");
+            send(sock, message, strlen(message), 0);
+  }
+  ```
+  <i>Client</i> akan memecah <b><i>filepath</i></b> yang diinputkan untuk memperoleh nama <i>file</i> yang akan dikirim ke server menggunakan `strtok`. Setelah itu, <i>client</i> akan mengirimkan <i>file</i> baris per baris menggunakan `fgets`. Setiap baris yang dikirimkan server akan menunggu respon dari server yang akan menjawab `OK`. Proses ini berakhir ketika <i>client</i> mengirimkan pesan `DONE`.
+  
+  Lanjutan proses <i>server</i> untuk soal [soal.1c](#1c "Goto 1c").
+  `server.c`
+  ```C
+  if (flag == 2) { //COMMAND "ADD" {
+       do {   
+            bzero(temp, 1000); //ERASE DATA IN THE 1000 BYTES OF THE MEMORY STARTING AT THE LOCATION POINTED BY TEMP
+            valread = recv(*new_socket, temp, 1000, 0);
+                
+            if (strcmp(temp, "DONE") != 0) {
+                 FILE *fileout;
+                 fileout = fopen(filePath, "a");
+                 fputs(temp, fileout);
+                 fclose(fileout);
+                 strcpy(message, "OK");
+                 send(*new_socket, message, strlen(message), 0);
+            }
+       } while (strcmp(temp, "DONE") != 0);
+            
+       printf("SAVING DONE.\n");
+       flag = 1;
+
+       FILE *fileout;
+       fileout = fopen("files.tsv", "a");
+       fprintf(fileout,"%s\t%s\t%s\n", filePath, publisher, year);
+       fclose(fileout);
+  }
+  ```
+  <i>Server</i> akan menulis tiap baris ke suatu <i>file</i> menggunakan `fputs` dan merespon dengan pesan `OK` untuk tiap barisnya hingga server menerima pesan `DONE`. Setelah itu server menambahkan <i>record</i> untuk <i>file</i> yang diinputkan pada `files.tsv` dan dengan `fprintf(fileout,"%s\t%s\t%s\n", filePath, publisher, year)` untuk menyimpan output sesuai dengan permintaan soal. Tidak lupa mengubah <i>value</i> `flag` agar kembali ke proses <i>command</i>. Terakhir, memunculkan pesan <b>sukses</b> di terminal <i>server</i> maupun <i>client</i>.
   
 ### 1D ###
 
