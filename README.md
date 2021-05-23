@@ -323,8 +323,8 @@ Kelompok D-04
                  login = 1;
                  flag = 1;
                         
-                 strcpy(id_login, id);
-                 strcpy(password_login, password);
+                 . . .
+		 
             }
                     
             else {
@@ -512,7 +512,7 @@ Kelompok D-04
 
        FILE *fileout;
        fileout = fopen("files.tsv", "a");
-       fprintf(fileout,"%s\t%s\t%s\n", filePath, publisher, year);
+       fprintf(fileout, "%s\t%s\t%s\n", filePath, publisher, year);
        fclose(fileout);
   }
   ```
@@ -552,7 +552,7 @@ Kelompok D-04
   ```
   Karena <i>command</i> terdiri dari dua kata, maka harus dipecah menggunakan `strtok` dengan delimiter ` ` sehingga bisa diperoleh nama <i>file</i> yang ingin diunduh, kemudian disimpan ke variabel `parameter`. Lalu <i>assign</i> variabel `flag` dengan 3 untuk masuk ke pengondisian <i>command</i> `download`.
   
-  Proses <i>client</i> ketika soal [soal.1d](#1d "Goto 1d") dijalankan.
+  Proses <i>client</i> ketika [soal.1d](#1d "Goto 1d") dijalankan.
   
   `client.c`
   ```C
@@ -941,7 +941,105 @@ Kelompok D-04
   ```
 
 - <b>JAWABAN</b>
+  
+  Pengondisian <i>command</i> `see`.
+  
+  `server.c`
+  ```C
+  if (flag == 6) { //COMMAND "FIND"
+       FILE *filein;
+       filein = fopen("files.tsv", "r");
 
+       char temp[1000] = {0};
+       char filePath[100] = {0}, publisher[100] = {0}, year[100] = {0}, name[100] = {0}, ext[100] = {0};
+            
+       while ((fscanf(filein, "%[^\n]%*c", temp)) != EOF) {
+            char *token = strtok(temp, "\t");
+
+            if (token != NULL) {
+                 strcpy(filePath, token);
+                 token = strtok(NULL, "\t");
+            }
+
+            if (token != NULL) {
+                 strcpy(publisher, token);
+                 token = strtok(NULL, "\t");
+            }
+
+            if (token != NULL) {
+                 strcpy(year, token);
+            }
+
+            token = strtok(temp, "/");
+            token = strtok(NULL, ".");
+            strcpy(name, token);
+            token = strtok(NULL, ".");
+            strcpy(ext, token);
+
+            char *ret =strstr(filePath, parameter[1]);
+
+            if (ret) {
+                 strcpy(message, "Nama: ");
+                 strcat(message, name);
+                 strcat(message, "\n");
+                 strcat(message, "Publisher: ");
+                 strcat(message, publisher);
+                 strcat(message, "\n");
+                 strcat(message, "Tahun publishing: ");
+                 strcat(message, year);
+                 strcat(message, "\n");
+                 strcat(message, "Ekstensi: ");
+                 strcat(message, ext);
+                 strcat(message, "\n");
+                 strcat(message, "Filepath: ");
+                 strcat(message, filePath);
+                 strcat(message, "\n");
+                 send(*new_socket, message, strlen(message), 0 );
+
+                 valread = recv(*new_socket, buffer, 1000, 0);
+            }
+       }
+
+       strcpy(message, "DONE");
+       send(*new_socket, message, strlen(message), 0 );
+       valread = recv(*new_socket, buffer, 1000, 0);
+            
+       fclose(filein);
+
+       flag = 1;
+  }
+  ```
+  <i>Server</i> melakukan pembacaan terhadap database `files.tsv` baris per baris dengan `fscanf(filein, "%[^\n]%*c", temp)) != EOF`. Menggunakan `strtok` dengan delimiter `\t` (tab) untuk mengambil <b><i>filepath</i></b>, <b>publisher</b>, dan <b>tahun publikasi</b>. Lalu dipecah lagi dengan delimiter `/` dan `.` sehingga bisa diperoleh ekstensi <i>file</i>-nya. Mengkombinasi `strcpy` dan `strcat` untuk mengeluarkan output sesuai dengan permintaan soal. Setelah selesai, server akan mengirimkan pesan `DONE`. Tidak lupa mengubah <i>value</i> `flag` agar kembali ke proses <i>command</i>.
+  
+   Proses <i>client</i> ketika [soal.1g](#1g "Goto 1g") dijalankan.
+  
+  `client.c`
+  ```C
+  else {
+  
+       . . .
+  
+       char *ret = strstr(message, "find");
+       
+       if (ret) {
+            do {
+                 bzero(buffer, 1024);
+                 valread = read(sock, buffer, 1024);
+                
+                 if (strcmp(buffer, "DONE") != 0) {
+                      printf("%s\n", buffer);
+                      strcpy(message, "OK");
+                      send(sock, message, strlen(message), 0);
+                 }
+            } while(strcmp(buffer, "DONE") != 0);
+
+            strcpy(message, "OK");
+            send(sock, message, strlen(message), 0);
+       }
+  }	    
+  ```
+  Saat menerima input `find` (dapat dicek menggunakan `strstr`), <i>client</i> akan menerima pesan terus menerus dari <i>server</i>. Proses ini berakhir ketika <i>client</i> mengirimkan pesan `DONE`.
+  
 ### 1H ###
 
 - <b>SOAL</b>
@@ -955,26 +1053,67 @@ Kelompok D-04
   ```
 - <b>JAWABAN</b>
 
-  ```C
+  Pendeklarasian variabel global untuk menyimpan <b>ID</b> dan <i><b>Password</b> Login</i>.
   
+  `server.c`
+  ```C
+  if (login == 0) {
+       if (found) {
+       
+       . . .     
+       
+            strcpy(id_login, id);
+            strcpy(password_login, password);
+       }
+       
+       . . .
+  }
   ```
-
-Struktur direktori:
-```
-├── Client
-│  ├── client.c
-│  ├── File2.ekstensi
-│  ├── File1.ekstensi
-│ 
-└── Server
-   ├── akun.txt
-   ├── files.tsv
-   ├── server.c
-   ├── running.log
-   └── FILES
-      ├── File2.ekstensi
-      ├── File1.ekstensi
-```
+  Server memiliki variabel global `id_login` dan `password_login` untuk menyimpan <b>ID</b> dan <i><b>Password</b></i> dari <i>client</i> yang berhasil melakukan <i>login</i>.
+  
+  Proses pembuatan log jika melakukan penambahan <i>file</i>.
+  
+  `server.c`
+  ```C
+  if (flag == 2) { //COMMAND "ADD"
+  
+  . . .
+  
+       if (found) {
+            
+	    . . .
+	    
+            FILE *fileout;
+            fileout = fopen("files.tsv", "a");
+       
+            . . .
+       
+            fileout = fopen("running.log", "a");
+            fprintf(fileout, "Tambah : %s (%s:%s)\n", fileName, id_login, password_login);
+            fclose(fileout);
+  }
+  ```
+  Saat <i>server</i> sudah selesai menerima <i>file</i> dari <i>client</i>, maka akan membuka `running.log` dan menggunakan <i>command</i> `a` agar data yang diinput ditambahkan di bagian akhir teks. Kemudian, menulis log dengan menggunakan `fprintf` sesuai format yang diminta soal. <b>ID</b> dan <i><b>Password</b> Client</i> diperoleh dari variabel global `id_login` dan `password_login`
+  
+  Proses pembuatan log jika melakukan penghapusan <i>file</i>.
+  
+  `server.c`
+  ```C
+  if (flag == 4) { //COMMAND "DELETE"
+  
+  . . .
+  
+       FILE *fileout;
+       fileout = fopen("files.tsv", "a");
+       
+       . . .
+       
+       fileout = fopen("running.log", "a");
+       fprintf(fileout, "Hapus : %s (%s:%s)\n", fileName, id_login, password_login);
+       fclose(fileout);
+  }
+  ```
+  Saat <i>server</i> sudah selesai menghapus <i>file</i>, maka akan membuka `running.log` dan menggunakan <i>command</i> `a` agar data yang diinput ditambahkan di bagian akhir teks. Kemudian, menulis log dengan menggunakan `fprintf` sesuai format yang diminta soal. <b>ID</b> dan <i><b>Password</b> Client</i> diperoleh dari variabel global `id_login` dan `password_login.
 
 ## SOAL 2 ##
 
@@ -1369,112 +1508,136 @@ Struktur direktori:
   
 - <b>JAWABAN</b>
   
-  Untuk melakukan perintah seperti diatas bisa dilakukan dengan cara seperti berikut
+  Untuk melakukan perintah seperti di atas bisa dilakukan dengan cara seperti berikut:
   ```C
-  if(argc > 2 && strcmp(argv[1], "-f") == 0)
-	{
-		pthread_t tid[argc-2];
-		int count = 0;
-		for(int i=2; i<argc; i++)
-		{
-			if(access(argv[i], F_OK) == 0)
-			{
-				pthread_create(&tid[count], NULL, kategori, (void *)argv[i]);
-				count++;
-				printf("File %d : Berhasil Dikategorikan\n", i-1);
-			}
-			else 
-				printf("File %d : Sad, gagal :(\n", i-1);
-		}
-		for(int i=0; i<count; i++) 
-			pthread_join(tid[i], NULL);
-		return 0;
-	}
-  ```
-  
-  Disini pertama kali yang harus dilakukan yaitu menentukan kondisinya dulu dimana disini kondisinya yaitu dimana dilakukan minimal 3 argumen yaitu `./soal3` untuk eksekusi file c, kemudian `-f` untuk menentukan perintah yang akan dilakukan dan terakhir path dari file yang ingin dikategorikan. Kemudian setelah itu dengan menggunakan fungsi `access` maka program akan mengakses path file yang akan dikategorikan dengan fungsi `kategori` dengan menggunakan perintah `pthread_create` untuk membuat thread untuk menjalankan perintah tersebut. fungsi kategori terdiri sebagai berikut.
-  ```C
-    void* kategori(void *arg)
+  if (argc > 2 && strcmp(argv[1], "-f") == 0)
   {
-    char *asal = (char *)arg;
-    char asalpath[150];
-    memcpy(asalpath, (char*)arg, 400);
-    char *asalTipe = cekTipe(asal);
-    char tipe[400];
-    strcpy(tipe, asalTipe);
+       pthread_t tid[argc - 2];
+       int count = 0;
+       
+       for(int i = 2; i < argc; i++)
+       {
+       
+       if (access(argv[i], F_OK) == 0)
+       {
+            pthread_create(&tid[count], NULL, kategori, (void *)argv[i]);
+	    count++;
+	    printf("File %d : Berhasil Dikategorikan\n", i - 1);
+       }
 
-    DIR *dir = opendir(asalTipe);
-    if(dir) 
-      closedir(dir);
-
-    else if(ENOENT == errno) 
-      mkdir(asalTipe, 0755);
-
-    char *srcName = cekNama(asalpath);
-    char *curr = getenv("PWD");
-
-    char pathTujuan[400];
-    sprintf(pathTujuan, "%s/%s/%s", curr, tipe, srcName);
-    rename(asalpath, pathTujuan);
+       else 
+       {
+            printf("File %d : Sad, gagal :(\n", i-1);
+       }
+       
+       for (int i = 0; i < count; i++) 
+       {
+            pthread_join(tid[i], NULL);
+       }
+       
+       return 0;
   }
   ```
   
-  Dalam fungsi kateogri ini yang pertama dilakukan adalah melakukan pengecekan tipe filenya berdasarkan ekstensinya dengan menggunakan fungsi `cekTipe` sebagai berikut
+  Di sini pertama kali yang harus dilakukan yaitu menentukan kondisinya dulu yang mana kondisinya dilakukan minimal tiga argumen yaitu `./soal3` untuk eksekusi <i>file</i> .c, kemudian `-f` untuk menentukan perintah yang akan dilakukan dan terakhir <i>path</i> dari <i>file</i> yang ingin dikategorikan. Kemudian dengan menggunakan fungsi `access`, program akan mengakses <i>path file</i> yang akan dikategorikan dengan fungsi `kategori` dan dengan menggunakan perintah `pthread_create` untuk membuat <i>thread</i> yang akan menjalankan perintah tersebut.
   ```C
-    char *cekTipe(char *dir)
+  void* kategori(void *arg)
   {
-    char *unknown = {"Unknown"};
-    char *hidden = {"Hidden"};
-    char *tmp = strrchr(dir, '/'); 
-    if(tmp[1] == '.') 
-      return hidden;
+       char *asal = (char *)arg;
+       char asalpath[150];
+       memcpy(asalpath, (char*)arg, 400);
+       char *asalTipe = cekTipe(asal);
+       char tipe[400];
+       strcpy(tipe, asalTipe);
 
-    int i = 0;
-    while(i < strlen(tmp) && tmp[i] != '.') 
-      i++;
-    if(i == strlen(tmp)) 
-      return unknown;
+       DIR *dir = opendir(asalTipe);
+       if (dir)
+       {
+            closedir(dir);
+       }
 
-    char tipe[400];
-    int j = i;
-    while(i < strlen(tmp)) 
-      tipe[i-j] = tmp[i], i++;
-    return hrfKecil(tipe + 1);
+       else if (ENOENT == errno) 
+       {
+            mkdir(asalTipe, 0755);
+       }
+
+       char *srcName = cekNama(asalpath);
+       char *curr = getenv("PWD");
+
+       char pathTujuan[400];
+       sprintf(pathTujuan, "%s/%s/%s", curr, tipe, srcName);
+       rename(asalpath, pathTujuan);
   }
   ```
   
-  Dimana dalam fungsi ini akan mengecek nama file terakhir di path dengan menggunakan perintah `strrchr` dimana perintah tersebut akan mengembalikan string dengan `/` terakhir. kemudian dari situ akan dicek apabila setelah `/` terdapat `.` maka file tersebut merupakan file hidden dan fungsi akan mengembalikan string `hidden`, dan apabila setelah tulisan tidak terdapat `.` maka akan mengembalikan string `unknown` dan terakhir apabila menemukan titik setelah string maka akan memanggil fungsi `hrfkecil` untuk mengecilkan huruf untuk tipe filenya yang kemudian akan dikembalikan ke fungsi `cekTipe`.
+  Dalam fungsi kategori ini yang pertama dilakukan adalah melakukan pengecekan tipe <i>file</i>-nya berdasarkan ekstensinya dengan menggunakan fungsi `cekTipe`.
+  ```C
+  char *cekTipe(char *dir)
+  {
+       char *unknown = {"Unknown"};
+       char *hidden = {"Hidden"};
+       char *tmp = strrchr(dir, '/'); 
+       
+       if (tmp[1] == '.')
+       {
+            return hidden;
+       }
+
+       int i = 0;
+       
+       while (i < strlen(tmp) && tmp[i] != '.')
+       {
+            i++;
+       }
+       
+       if (i == strlen(tmp))
+       {
+            return unknown;
+       }
+
+       char tipe[400];
+       int j = i;
+       
+       while (i < strlen(tmp))
+       {
+            tipe[i-j] = tmp[i], i++;
+       }
+       
+       return hrfKecil(tipe + 1);
+  }
+  ```
   
-  Kemudian setelah fungsi `Kategori` mendapatkan string dari fungsi `cekTipe ` selanjutnya akan mengecek apabila folder tersebut sudah ada maka dengan perintah `sprintf` akan mengubah path dari file tersebut kedalam path yang baru yaitu path ke folder dengan tipe data yang sudah ditentukan.
+  Fungsi ini akan mengecek nama <i>file</i> terakhir di <i>path</i> dengan menggunakan perintah `strrchr`. Perintah tersebut akan mengembalikan <i>string</i> dengan `/` terakhir. Kemudian dari situ akan dicek apabila setelah `/` terdapat `.`, maka <i>file</i> tersebut merupakan <i>file hidden</i> dan fungsi akan mengembalikan string `hidden`. Apabila setelah tulisan tidak terdapat `.` maka akan mengembalikan <i>string</i> `unknown`. Dan terakhir apabila menemukan titik setelah <i>string</i> maka akan memanggil fungsi `hrfkecil` untuk mengecilkan huruf tipe <i>file</i>-nya yang kemudian akan dikembalikan ke fungsi `cekTipe`.
   
-  Output yang dihasilkan adalah sebagai berikut:
+  Kemudian setelah fungsi `kategori` mendapatkan <i>string</i> dari fungsi `cekTipe `, selanjutnya akan mengecek apabila folder tersebut sudah ada maka dengan perintah `sprintf` akan mengubah <i>path</i> dari <i>file</i> tersebut ke dalam <i>path</i> yang baru yaitu <i>path</i> ke folder dengan tipe data yang sudah ditentukan.
   
-  Kondisi sebelum di run
+- <b>OUTPUT</b>
   
-  [![3asebelum.png](https://i.postimg.cc/0ykK5BMq/3asebelum.png)](https://postimg.cc/PP752KQ6)
+  <b><i>Kondisi sebelum di-<i>run</i></i></b>
   
-  Pada saat di run di terminal akan muncul seperti ini
+  <img src="https://i.postimg.cc/0ykK5BMq/3asebelum.png)" width="640" height="480">
   
-  [![3adirun.png](https://i.postimg.cc/jdQJbbjX/3adirun.png)](https://postimg.cc/Cz5KG9kB)
+  <b><i>Pada saat di-<i>run</i> di terminal akan muncul seperti ini</i></b>
   
-  Kondisi setelah di run dimana file bs.hex dan Pledge.pdf sudah ada di dalam folder masing2
+  <img src="https://i.postimg.cc/jdQJbbjX/3adirun.png)">
   
-  [![3asesudah.png](https://i.postimg.cc/1zYvr6hf/3asesudah.png)](https://postimg.cc/f3m7wVbN)
+  <b><i>Kondisi setelah di-<i>run</i>, <i>file</i> `bs.hex` dan `Pledge.pdf` sudah ada di dalam folder masing-masing</i></b>
   
-  isi folder hex
+  <img src="https://i.postimg.cc/1zYvr6hf/3asesudah.png)">
   
-  [![3asesudah1.png](https://i.postimg.cc/VLcDgmTB/3asesudah1.png)](https://postimg.cc/kDfQX37B)
+  <b><i>Isi folder .hex</i></b>
   
-  isi folder pdf
+  <img src="https://i.postimg.cc/VLcDgmTB/3asesudah1.png)">
   
-  [![3asesudah2.png](https://i.postimg.cc/nrfY3Gdc/3asesudah2.png)](https://postimg.cc/5YpC0LdZ)
+  <b><i>Isi folder .pdf</i></b>
   
+  <img src="https://i.postimg.cc/nrfY3Gdc/3asesudah2.png)">
   
 ### 3B ###
 
 - <b>SOAL</b>
 
-  Program juga dapat menerima opsi `-d` untuk melakukan pengkategorian pada suatu <i>directory</i>. Namun pada opsi `-d` ini, user hanya bisa memasukkan input 1 <i>directory</i> saja, tidak seperti <i>file</i> yang bebas menginput <i>file</i> sebanyak mungkin. Contohnya adalah seperti ini:
+  Program juga dapat menerima opsi `-d` untuk melakukan pengkategorian pada suatu <i>directory</i>. Namun pada opsi `-d` ini, user hanya bisa memasukkan input satu <i>directory</i> saja, tidak seperti <i>file</i> yang bebas menginput <i>file</i> sebanyak mungkin. Contohnya adalah seperti ini:
   ```
   $ ./soal3 -d /path/to/directory/
   ```
@@ -1488,69 +1651,76 @@ Struktur direktori:
   ```
 - <b>JAWABAN</b>
   
-  Untuk 3B pertama langkahnya sama seperti 3a namun memiliki fungsi yang berbeda yaitu fungsi `kategoriFolder` sebagai berikut.
+  Untuk [soal.3b](#3b "Goto 3b") langkahnya sama seperti [soal.3a](#3a "Goto 3a"), namun memiliki fungsi yang berbeda yaitu fungsi `kategoriFolder`.
   ```C
-    void kategoriFolder(char *folderPath, int threadSize)
+  void kategoriFolder(char *folderPath, int threadSize)
   {
-    DIR *fd = opendir(folderPath);
-    struct dirent *dp;
-    pthread_t tid[threadSize];
-    int count = 0;
-    char fileName[400][400];
+       DIR *fd = opendir(folderPath);
+       struct dirent *dp;
+       pthread_t tid[threadSize];
+       int count = 0;
+       char fileName[400][400];
 
-    while((dp = readdir(fd)) != NULL)
-    {
-      if(dp->d_type == DT_REG)
-      {
-        sprintf(fileName[count], "%s/%s", folderPath, dp->d_name);
-        pthread_create(&tid[count], NULL, kategori, (void *)fileName[count]);
-        count++;
-      }
-      else if((dp->d_type == DT_DIR) && strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0) 
-      {
-              char folderPath2[400];
-              sprintf(folderPath2, "%s/%s", folderPath, dp->d_name);
-              DIR *fd2 = opendir(folderPath2);
-              struct dirent *dp2;
-        int threadSize2 = 0;
-        while((dp2 = readdir(fd2)) != NULL)
-        {
-          if(dp2->d_type == DT_REG)
-          {
-            threadSize2++;
-          }
-        }
-        kategoriFolder(folderPath2, threadSize2);
-        closedir(fd2);
-          }
-    }
+       while ((dp = readdir(fd)) != NULL)
+       {
+            if (dp->d_type == DT_REG)
+            {
+                 sprintf(fileName[count], "%s/%s", folderPath, dp->d_name);
+                 pthread_create(&tid[count], NULL, kategori, (void *)fileName[count]);
+                 count++;
+            }
+            
+	    else if ((dp->d_type == DT_DIR) && strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0) 
+            {
+                 char folderPath2[400];
+                 sprintf(folderPath2, "%s/%s", folderPath, dp->d_name);
+                 DIR *fd2 = opendir(folderPath2);
+                 struct dirent *dp2;
+            
+	         int threadSize2 = 0;
+            
+	         while ((dp2 = readdir(fd2)) != NULL)
+                 {
+                      if (dp2->d_type == DT_REG)
+                      {
+                           threadSize2++;
+                      }
+                 }
+            
+	         kategoriFolder(folderPath2, threadSize2);
+            
+	         closedir(fd2);
+            }
+       }
 
-    for(int i=0; i<threadSize; i++) 
-      pthread_join(tid[i], NULL);
+       for (int i = 0; i < threadSize; i++)
+       {
+            pthread_join(tid[i], NULL);
+       }
+      
       closedir(fd);
   }
   ```
   
-  Untuk no 3b diminta untuk mengkategorikan file-file yang ada didalam folder, untuk mengkategorikannya menggunakan fungsi `kategori` seperti nomer 3a namun untuk mengubah pathnya disini akan menggunakan rekursi untuk mengeluarkan file-file yang ada didalam folder tersebut dan mengkategorikannya berdasarkan ekstensi file tersebut dengan cara yang sama dengan 3a yaitu mengubah path dari file tersebut.
+  [soal.3b](#3b "Goto 3b") diminta untuk mengkategorikan <i>file</i>-<i>file</i> yang ada di dalam folder. Untuk mengkategorikannya menggunakan fungsi `kategori` seperti [soal.3a](#3a "Goto 3a"), namun untuk mengubah <i>path</i>-nya. Menggunakan rekursi untuk mengeluarkan <i>file</i>-<i>file</i> yang ada di dalam folder tersebut dan mengkategorikannya berdasarkan ekstensi <i>file</i> dengan cara yang sama dengan [soal.3b](#3b "Goto 3b") yaitu mengubah <i>path</i> dari <i>file</i> tersebut.
   
-  Output yang dihasilkan adalah sebagai berikut:
+- <b>OUTPUT</b>
   
-  contoh folder sebelum di eksekusi
+  <b><i>Folder sebelum dieksekusi</i></b>
   
-  [![3bsebelum.png](https://i.postimg.cc/V6CdHyTX/3bsebelum.png)](https://postimg.cc/CBwhz2wK)
+  <img src="https://i.postimg.cc/V6CdHyTX/3bsebelum.png)">
   
-  Saat di eksekusi maka di terminal akan muncul seperti ini
+  <b><i>Saat dieksekusi, maka di terminal akan muncul seperti ini</i></b>
   
-  [![3bdirun.png](https://i.postimg.cc/CxcBRskn/3bdirun.png)](https://postimg.cc/fV0TFXHM)
+  <img src="https://i.postimg.cc/CxcBRskn/3bdirun.png)">
   
-  Sesudah di eksekusi maka akan muncul folder jpg baru yang berasal dari folder sebelumnya
+  <b><i>Sesudah dieksekusi, maka akan muncul folder .jpg baru yang berasal dari folder sebelumnya</i></b>
   
-  [![3bsesudah.png](https://i.postimg.cc/nLMsB9GR/3bsesudah.png)](https://postimg.cc/945FjMSZ)
+  <img src="https://i.postimg.cc/nLMsB9GR/3bsesudah.png)">
   
-  Isi dari folder jpg
+  <b><i>Isi dari folder .jpg</i></b>
   
-  [![3bsesudah2.png](https://i.postimg.cc/s28McfnV/3bsesudah2.png)](https://postimg.cc/XZfNNWSh)
-
+  <img src="https://i.postimg.cc/s28McfnV/3bsesudah2.png)">
 
 ### 3C ###
 
@@ -1564,38 +1734,41 @@ Struktur direktori:
   Opsi ini akan mengkategorikan seluruh <i>file</i> yang ada di <i>working directory</i> ketika menjalankan program C tersebut.
   
 - <b>JAWABAN</b>
-  Untuk menjalankan perintah tersebut dilakukan sebagai berikut.
-  ```
-  else if(argc == 2 && strcmp(argv[1], "*") == 0)
-	{
-		char *curr = getenv("PWD");
-		DIR *dir = opendir(curr);
-		struct dirent *dp;
-		int threadSize = 0;
-		while((dp = readdir(dir)) != NULL)
-		{
-			if(dp->d_type == DT_REG)
-			{
-				threadSize++;
-			}
-		}
-		kategoriFolder(curr, threadSize);
-		closedir(dir);
-	}
-  ```
-  Dengan cara yang sama dengan 3b namun disini path yang digunakan adalah path folder yang ada saat ini sehingga folder yang ada didalam wordking directory akan mengkategorikan seluruh file dan folder yang ada didalam working directory
   
-  Output yang dihasilkan adalah sebagai berikut:
-  <br>
-  sebelum program di eksekusi
-  <br>
-  [![3csebelum.png](https://i.postimg.cc/wxD1XpDp/3csebelum.png)](https://postimg.cc/Yjq27TXn)
-  <br>
-  Sesudah program di eksekusi
-  <br>
-  [![3csesudah.png](https://i.postimg.cc/T1jhfVTw/3csesudah.png)](https://postimg.cc/PvxdM8ps)
-  <br>
+  Untuk menjalankan perintah tersebut, dilakukan sebagai berikut:
+  ```C
+  else if (argc == 2 && strcmp(argv[1], "*") == 0)
+  {
+       char *curr = getenv("PWD");
+       DIR *dir = opendir(curr);
+       struct dirent *dp;
+       int threadSize = 0;
+ 
+       while ((dp = readdir(dir)) != NULL)
+       {
+            if (dp->d_type == DT_REG)
+            {
+	         threadSize++;
+	    }
+        }
+        
+	kategoriFolder(curr, threadSize);
+	
+	closedir(dir);
+  }
+  ```
+  
+  Dengan cara yang sama dengan [soal.3b](#3b "Goto 3b"), namun di sini <i>path</i> yang digunakan adalah <i>path</i> folder yang ada saat ini sehingga folder yang ada di dalam <i>working directory</i> akan mengkategorikan seluruh <i>file</i> dan folder yang ada di dalam <i>working directory</i>.
+  
+- <b>OUTPUT</b>
 
+  <b><i>Sebelum program dieksekusi</i></b>
+  
+  <img src="https://i.postimg.cc/wxD1XpDp/3csebelum.png))">
+  
+  <b><i>Sesudah program dieksekusi</i></b>
+  
+  <img src="https://i.postimg.cc/T1jhfVTw/3csesudah.png)">
 
 ### 3D ###
 
@@ -1604,18 +1777,18 @@ Struktur direktori:
   Semua <i>file</i> harus berada di dalam folder, jika terdapat <i>file</i> yang tidak memiliki ekstensi, <i>file</i> disimpan dalam folder `Unknown`. Jika file <i>hidden</i>, masuk folder `Hidden`.
   
 - <b>JAWABAN</b>
-  Untuk menjalankan perintah tersebut menggunakan fungsi `cekTipe` yang sudah dijelaskan di no 3a dimana dalam fungsi tersebut akan mengembalikan string `hidden` apabila memebuhi syarat seperti dijelaskan di no 3a dan akan mengembalikan string `unknown` apabila memenuhi syarat yang ada dimana kemudian akan masuk ke fungsi `kategori` dengan membawa string `hidden` atau `unknown` yang kemudian akan diubah path dari file tersebut ke path folder yang sesuai.
   
-  Output yang didapatkan adalah sebagai berikut:
+  Untuk menjalankan perintah tersebut menggunakan fungsi `cekTipe` yang sudah dijelaskan di [soal.3a](#3a "Goto 3a"), yang mana fungsi tersebut akan mengembalikan <i>string</i> `hidden` apabila memebuhi syarat dan akan mengembalikan <i>string</i> `unknown` apabila memenuhi syarat pula. Kemudian akan masuk ke fungsi `kategori` dengan membawa <i>string</i> `hidden` atau `unknown` yang akan diubah <i>path</i>-nya ke <i>path</i> folder yang sesuai.
   
-  Isi dari folder hidden
+- <b>OUTPUT</b>
   
-  [![3dhidden.png](https://i.postimg.cc/BbftrY9k/3dhidden.png)](https://postimg.cc/62z9RhQf)
+  <b><i>Isi dari folder</i></b> `hidden`
   
-  Isi dari folder unknown
+  <img src="https://i.postimg.cc/BbftrY9k/3dhidden.png)">
   
-  [![3dunknown.png](https://i.postimg.cc/wTH7FGks/3dunknown.png)](https://postimg.cc/V5Gfk4pY)
+  <b><i>Isi dari folder</i></b> `unknown`
   
+  <img src="https://i.postimg.cc/wTH7FGks/3dunknown.png)">
 
 ### 3E ###
 
@@ -1625,15 +1798,14 @@ Struktur direktori:
 
 - <b>JAWABAN</b>
   
-  Untuk menjalankan perintah tersebut digunakan looping sebagai berikut
+  Untuk menjalankan perintah tersebut digunakan <i>looping</i>.
   ```C
-  while((dp = readdir(fd)) != NULL)
-			{
-				if(dp->d_type == DT_REG)
-				{
-					threadSize++;
-				}
-			}
+  while ((dp = readdir(fd)) != NULL)
+  {
+       if (dp->d_type == DT_REG)
+       {
+            threadSize++;
+       }
+  }
   ```
-  
-  Looping tersebut berfungsi untuk terus menambah thread pada setiap eksekusi file sehingga setiap file berjalan di satu thread, sehingga program bisa berjalan dengan lebih cepat
+  <i>Looping</i> tersebut berfungsi untuk terus menambah <i>thread</i> pada setiap eksekusi <i>file</i> sehingga setiap <i>file</i> berjalan di satu <i>thread</i> dan program bisa berjalan dengan lebih efisien.
