@@ -1585,7 +1585,7 @@ Kelompok D-04
 
 ### KENDALA ###
  
-- Deskripsi pada [soal.2b](#2b "Goto 2b") agak membingungkan, ternyata menggunakan matriks baru untuk menghitung faktorial matriks hasil perkalian dari [soal.2b](#2a "Goto 2a").
+- Deskripsi pada [soal.2b](#2b "Goto 2b") agak membingungkan, ternyata menggunakan matriks baru untuk menghitung faktorial matriks hasil perkalian dari [soal.2a](#2a "Goto 2a").
 - Program [soal.2c](#2c "Goto 2c") tidak jalan ketika memakai <i>template pipes</i>, entah kenapa. Terpaksa memakai <i>template</i> yang ada di internet.
 - Bingung untuk <i>shared memory</i> pada <i>array</i> 2D. 
 
