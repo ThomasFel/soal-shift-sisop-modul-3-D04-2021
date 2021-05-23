@@ -1515,19 +1515,20 @@ Kelompok D-04
        pthread_t tid[argc - 2];
        int count = 0;
        
-       for(int i = 2; i < argc; i++)
+       for (int i = 2; i < argc; i++)
        {
        
-       if (access(argv[i], F_OK) == 0)
-       {
-            pthread_create(&tid[count], NULL, kategori, (void *)argv[i]);
-	    count++;
-	    printf("File %d : Berhasil Dikategorikan\n", i - 1);
-       }
+            if (access(argv[i], F_OK) == 0)
+            {
+	         	pthread_create(&tid[count], NULL, kategori, (void *)argv[i]);
+	         	count++;
+			printf("File %d : Berhasil Dikategorikan\n", i-1);
+            }
 
-       else 
-       {
-            printf("File %d : Sad, gagal :(\n", i-1);
+            else 
+            {
+                 printf("File %d : Sad, gagal :(\n", i-1);
+            }
        }
        
        for (int i = 0; i < count; i++) 
