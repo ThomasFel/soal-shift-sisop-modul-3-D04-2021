@@ -1797,7 +1797,7 @@ Kelompok D-04
             pthread_join(tid[i], NULL);
        }
       
-      closedir(fd);
+       closedir(fd);
   }
   ```
   
@@ -1847,9 +1847,9 @@ Kelompok D-04
        {
             if (dp->d_type == DT_REG)
             {
-	         threadSize++;
-	    }
-        }
+	             threadSize++;
+	        }
+       }
         
 	kategoriFolder(curr, threadSize);
 	
